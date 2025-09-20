@@ -26,7 +26,7 @@ const LetterBox = ({ isOpen, onButtonClick }: LetterBoxProps) => {
     onButtonClick();
   };
 
-  // Animation values for envelope-style opening
+  // Animation values for envelope-style opening (fixed variable names)
   const topFlapRotation = isOpen ? -Math.PI * 0.7 : 0;
   const bottomFlapRotation = isOpen ? Math.PI * 0.7 : 0;
   const insideScale = isOpen ? [3, 1, 1] : [1, 1, 1];
