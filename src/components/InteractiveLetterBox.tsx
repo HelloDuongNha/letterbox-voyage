@@ -1,222 +1,283 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import * as React from "react";
-import { Canvas, useFrame, ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, ThreeEvent, useLoader } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 
 interface LetterBoxProps {
   isOpen: boolean;
-  onButtonClick: () => void;
 }
 
-const LetterBox = ({ isOpen, onButtonClick }: LetterBoxProps) => {
+const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [number, number, number] }) => {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState(0); // 0: closed, 1: top opening, 2: bottom opening
+  
+  
+  // Load textures
+  const frontTexture = useLoader(THREE.TextureLoader, '/front.png');
+  const backTexture = useLoader(THREE.TextureLoader, '/back.png');
+  const frontAfterTexture = useLoader(THREE.TextureLoader, '/front-after.png');
+  const insideTopTexture = useLoader(THREE.TextureLoader, '/inside-top.png');
+  const insideMidTexture = useLoader(THREE.TextureLoader, '/inside-mid.png');
+  const insideBotTexture = useLoader(THREE.TextureLoader, '/inside-bot.png');
+  
+  // Smooth animation values
+  const [topRotation, setTopRotation] = useState(Math.PI); // Start folded
+  const [bottomRotation, setBottomRotation] = useState(-Math.PI); // Start folded like top
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (groupRef.current && !isOpen) {
-      // Gentle floating animation when closed
+      // Gentle floating animation when closed (always active)
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.1;
       groupRef.current.rotation.y += 0.002;
     }
+
+    // Smooth transitions
+    const speed = 3; // Animation speed
+    
+    // Opening animation only
+    const targetTopRotation = animationPhase >= 1 ? 0 : Math.PI;
+    const targetBottomRotation = animationPhase >= 2 ? 0 : -Math.PI; // Stay folded until phase 2
+    
+    setTopRotation(prev => {
+      const diff = targetTopRotation - prev;
+      return prev + diff * speed * delta;
+    });
+    
+    setBottomRotation(prev => {
+      const diff = targetBottomRotation - prev;
+      return prev + diff * speed * delta;
+    });
+
   });
 
-  const handleButtonClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    onButtonClick();
-  };
-
-  // Animation values for envelope-style opening (fixed variable names)
-  const topFlapRotation = isOpen ? -Math.PI * 0.7 : 0;
-  const bottomFlapRotation = isOpen ? Math.PI * 0.7 : 0;
-  const insideScale = isOpen ? [3, 1, 1] : [1, 1, 1];
-  const insideOpacity = isOpen ? 1 : 0;
+  // Simple opening animation only
+  React.useEffect(() => {
+    if (isOpen) {
+      setAnimationPhase(1);
+      // Bottom starts opening when top is 70% open (0.7 * 800ms = 560ms)
+      setTimeout(() => {
+        setAnimationPhase(2);
+      }, 560);
+    } else {
+      setAnimationPhase(0);
+      // Reset positions when closing
+      setTopRotation(Math.PI);
+      setBottomRotation(-Math.PI);
+    }
+  }, [isOpen]);
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
+    <group ref={groupRef} position={cardPosition as [number, number, number]}>
       {/* Main box container */}
       <group>
-        {/* Front face (red) - Split into top and bottom flaps when opening */}
+        {/* Folded letter structure */}
         {!isOpen ? (
-          // Closed state - single red face
-          <mesh position={[0, 0, 0.05]} rotation={[0, 0, 0]}>
-            <planeGeometry args={[4, 2]} />
-            <meshStandardMaterial 
-              color="#dc2626" 
-              metalness={0.1} 
-              roughness={0.3}
-            />
-          </mesh>
-        ) : (
-          // Open state - split into top and bottom flaps
+          // Closed state - showing front texture
           <>
-            {/* Top flap - opens upward like envelope */}
-            <group position={[0, 0.5, 0]} rotation={[topFlapRotation, 0, 0]}>
-              <mesh position={[0, 0.5, 0.05]}>
-                <planeGeometry args={[4, 1]} />
-                <meshStandardMaterial 
-                  color="#dc2626" 
-                  metalness={0.1} 
-                  roughness={0.3}
-                  transparent
-                  opacity={0.9}
-                />
-              </mesh>
+            {/* Front face when closed */}
+            <mesh position={[0, 0, 0.05]} rotation={[0, 0, 0]}>
+              <planeGeometry args={[4, 2]} />
+              <meshStandardMaterial 
+                map={frontTexture}
+                metalness={0.1} 
+                roughness={0.3}
+                transparent={true}
+              />
+            </mesh>
+          </>
+        ) : (
+          // Open state - simple tri-fold paper
+          <>
+            {/* Top section - inside-top front, front-after back */}
+            <group position={[0, 1, 0]}>
+              <group rotation={[topRotation, 0, 0]}>
+                <mesh position={[0, 1, 0.04]}>
+                  <planeGeometry args={[4, 2]} />
+                  <meshStandardMaterial 
+                    map={insideTopTexture}
+                    metalness={0.1} 
+                    roughness={0.3}
+                    transparent={true}
+                  />
+                </mesh>
+                <mesh position={[0, 1, 0.039]} rotation={[0, Math.PI, 0]}>
+                  <planeGeometry args={[4, 2]} />
+                  <meshStandardMaterial 
+                    map={frontAfterTexture}
+                    metalness={0.1} 
+                    roughness={0.3}
+                    transparent={true}
+                  />
+                </mesh>
+              </group>
             </group>
 
-            {/* Bottom flap - opens downward */}
-            <group position={[0, -0.5, 0]} rotation={[bottomFlapRotation, 0, 0]}>
-              <mesh position={[0, -0.5, 0.05]}>
-                <planeGeometry args={[4, 1]} />
-                <meshStandardMaterial 
-                  color="#dc2626" 
-                  metalness={0.1} 
-                  roughness={0.3}
-                  transparent
-                  opacity={0.9}
-                />
-              </mesh>
+            {/* Center section - inside-mid front, back.png back */}
+            <mesh position={[0, 0, 0.04]} rotation={[0, 0, 0]}>
+              <planeGeometry args={[4, 2]} />
+              <meshStandardMaterial 
+                map={insideMidTexture}
+                metalness={0.1} 
+                roughness={0.3}
+                transparent={true}
+              />
+            </mesh>
+            <mesh position={[0, 0, 0.039]} rotation={[0, Math.PI, 0]}>
+              <planeGeometry args={[4, 2]} />
+              <meshStandardMaterial 
+                map={backTexture}
+                metalness={0.1} 
+                roughness={0.3}
+                transparent={true}
+              />
+            </mesh>
+
+            {/* Bottom section - inside-bot front, white back */}
+            <group position={[0, -1, 0]}>
+              <group rotation={[bottomRotation, 0, 0]}>
+                <mesh position={[0, -1, 0.04]}>
+                  <planeGeometry args={[4, 2]} />
+                  <meshStandardMaterial 
+                    map={insideBotTexture}
+                    metalness={0.1} 
+                    roughness={0.3}
+                    transparent={true}
+                  />
+                </mesh>
+                <mesh position={[0, -1, 0.039]} rotation={[0, Math.PI, 0]}>
+                  <planeGeometry args={[4, 2]} />
+                  <meshStandardMaterial 
+                    color="#ffffff"
+                    metalness={0.1} 
+                    roughness={0.3}
+                  />
+                </mesh>
+              </group>
             </group>
           </>
         )}
 
-        {/* Back face (blue) */}
-        <mesh position={[0, 0, -0.05]} rotation={[0, Math.PI, 0]}>
-          <planeGeometry args={[4, 2]} />
-          <meshStandardMaterial 
-            color="#2563eb" 
-            metalness={0.1} 
-            roughness={0.3}
-          />
-        </mesh>
-
-        {/* Top edge */}
-        <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[4, 0.1]} />
-          <meshStandardMaterial color="#991b1b" />
-        </mesh>
-
-        {/* Bottom edge */}
-        <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[4, 0.1]} />
-          <meshStandardMaterial color="#991b1b" />
-        </mesh>
-
-        {/* Left edge */}
-        <mesh position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <planeGeometry args={[0.1, 2]} />
-          <meshStandardMaterial color="#991b1b" />
-        </mesh>
-
-        {/* Right edge */}
-        <mesh position={[2, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-          <planeGeometry args={[0.1, 2]} />
-          <meshStandardMaterial color="#991b1b" />
-        </mesh>
-
-        {/* Black button on front face */}
+        {/* Back face - only visible when closed */}
         {!isOpen && (
-          <mesh 
-            position={[0, 0, 0.06]} 
-            onClick={handleButtonClick}
-            onPointerEnter={() => setHovered(true)}
-            onPointerLeave={() => setHovered(false)}
-            scale={hovered ? 1.1 : 1}
-          >
-            <circleGeometry args={[0.3, 32]} />
+          <mesh position={[0, 0, -0.05]} rotation={[0, Math.PI, 0]}>
+            <planeGeometry args={[4, 2]} />
             <meshStandardMaterial 
-              color="#000000" 
-              metalness={0.2} 
-              roughness={0.1}
-              emissive={hovered ? "#333333" : "#000000"}
-              emissiveIntensity={hovered ? 0.1 : 0}
+              map={backTexture}
+              metalness={0.1} 
+              roughness={0.3}
+              transparent={true}
             />
           </mesh>
         )}
+
+
+        {/* Edges - only when closed */}
+        {!isOpen && (
+          <>
+            {/* Top edge */}
+            <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[4, 0.1]} />
+              <meshStandardMaterial color="#991b1b" />
+            </mesh>
+
+            {/* Bottom edge */}
+            <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[4, 0.1]} />
+              <meshStandardMaterial color="#991b1b" />
+            </mesh>
+
+            {/* Left edge */}
+            <mesh position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+              <planeGeometry args={[0.1, 2]} />
+              <meshStandardMaterial color="#991b1b" />
+            </mesh>
+
+            {/* Right edge */}
+            <mesh position={[2, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+              <planeGeometry args={[0.1, 2]} />
+              <meshStandardMaterial color="#991b1b" />
+            </mesh>
+          </>
+        )}
+
       </group>
 
-      {/* Yellow interior - extends to 3x length when fully open */}
-      {isOpen && (
-        <group scale={insideScale as [number, number, number]}>
-          <mesh position={[0, 0, 0]}>
-            <planeGeometry args={[4, 2]} />
-            <meshStandardMaterial 
-              color="#eab308" 
-              metalness={0.2} 
-              roughness={0.2}
-              transparent
-              opacity={insideOpacity}
-              emissive="#fbbf24"
-              emissiveIntensity={0.1}
-            />
-          </mesh>
-        </group>
-      )}
     </group>
   );
 };
 
 interface InteractiveLetterBoxProps {
   className?: string;
+  isOpen: boolean;
+  onCameraControl?: (action: 'top' | 'middle' | 'bottom') => void;
 }
 
-export const InteractiveLetterBox = ({ className }: InteractiveLetterBoxProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [lastInteraction, setLastInteraction] = useState(Date.now());
+export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: InteractiveLetterBoxProps) => {
+  // isOpen is now controlled from parent component
+  const controlsRef = useRef<any>(null);
+  const [cardPosition, setCardPosition] = useState([0, 0, 0]);
 
-  const handleButtonClick = () => {
-    setIsOpen(!isOpen);
-    setLastInteraction(Date.now());
-  };
-
-  // Auto-close after 3 seconds of no interaction
+  // Camera control function
   React.useEffect(() => {
-    if (!isOpen) return;
-
-    const checkAutoClose = () => {
-      if (Date.now() - lastInteraction > 3000) {
-        setIsOpen(false);
-      }
+    const handleCameraControl = (scrollValue: number) => {
+      // Smooth interpolation: 0-100 scroll maps to card position
+      // 0 = bottom (card up), 50 = middle, 100 = top (card down)
+      const normalizedValue = scrollValue / 100; // 0 to 1
+      const yPosition = (normalizedValue - 0.5) * -5; // -2.5 to +2.5, inverted
+      setCardPosition([0, yPosition, 0]);
     };
-
-    const interval = setInterval(checkAutoClose, 500);
-    return () => clearInterval(interval);
-  }, [isOpen, lastInteraction]);
-
-  // Track user interaction to reset auto-close timer
-  const handleInteraction = () => {
-    setLastInteraction(Date.now());
-  };
+    
+    // Expose function to parent
+    (window as any).handleCameraControl = handleCameraControl;
+  }, []);
 
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={25} />
         
-        {/* Lighting setup */}
-        <ambientLight intensity={0.4} />
+        {/* Enhanced lighting setup */}
+        <ambientLight intensity={0.6} />
+        
+        {/* Main directional light from front */}
         <directionalLight 
-          position={[5, 5, 5]} 
-          intensity={0.8} 
+          position={[0, 0, 10]} 
+          intensity={1.2} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
-        <pointLight position={[-5, -5, 5]} intensity={0.3} color="#4338ca" />
-        <pointLight position={[5, -5, -5]} intensity={0.2} color="#dc2626" />
+        
+        {/* Back lighting for when rotated */}
+        <directionalLight 
+          position={[0, 0, -10]} 
+          intensity={0.8} 
+        />
+        
+        {/* Side fill lights */}
+        <pointLight position={[10, 0, 0]} intensity={0.4} />
+        <pointLight position={[-10, 0, 0]} intensity={0.4} />
+        
+        {/* Top and bottom lights for even coverage */}
+        <pointLight position={[0, 10, 0]} intensity={0.3} />
+        <pointLight position={[0, -10, 0]} intensity={0.3} />
 
-        <LetterBox isOpen={isOpen} onButtonClick={handleButtonClick} />
+        <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} />
         
         <OrbitControls 
-          enablePan={false}
+          ref={controlsRef}
+          enablePan={isOpen}
           enableZoom={true}
-          minDistance={5}
-          maxDistance={15}
-          maxPolarAngle={Math.PI / 1.5}
-          minPolarAngle={Math.PI / 6}
+          minDistance={2}
+          maxDistance={50}
+          maxPolarAngle={Math.PI}
+          minPolarAngle={0}
           enableDamping
           dampingFactor={0.05}
-          onChange={handleInteraction}
+          maxAzimuthAngle={Infinity}
+          minAzimuthAngle={-Infinity}
         />
       </Canvas>
     </div>
