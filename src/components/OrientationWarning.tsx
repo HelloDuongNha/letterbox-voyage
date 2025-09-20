@@ -32,20 +32,20 @@ export const OrientationWarning = () => {
         </div>
         
         <h2 className="text-xl font-bold text-foreground mb-3">
-          Vui lòng xoay ngang
+          ກະລຸນາໝຸນໜ້າຈໍ
         </h2>
         
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Để có trải nghiệm tốt nhất với hộp thư 3D, hãy xoay thiết bị của bạn sang chế độ ngang.
+          ເພື່ອປະສົບການທີ່ດີທີ່ສຸດກັບກ່ອງຈົດໝາຍ 3D, ກະລຸນາໝຸນອຸປະກອນຂອງທ່ານໄປສູ່ໂໝດນອນ.
         </p>
         
         <div className="mt-4 p-3 bg-accent/10 rounded-lg border border-accent/20">
           <div className="flex items-center justify-center space-x-2 text-accent text-xs font-medium">
-            <div className="w-8 h-5 border-2 border-current rounded-sm flex items-center justify-center">
+            <div className="w-5 h-8 border-2 border-current rounded-sm flex items-center justify-center">
               <div className="w-1 h-1 bg-current rounded-full" />
             </div>
             <span>→</span>
-            <div className="w-5 h-8 border-2 border-current rounded-sm flex items-center justify-center">
+            <div className="w-8 h-5 border-2 border-current rounded-sm flex items-center justify-center">
               <div className="w-1 h-1 bg-current rounded-full" />
             </div>
           </div>

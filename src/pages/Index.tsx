@@ -18,7 +18,7 @@ const Index = () => {
     <>
       <OrientationWarning />
       
-      <main className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      <main className="fixed inset-0 flex items-center justify-center overflow-visible">
         {/* Background with subtle pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background opacity-90" />
         
@@ -39,7 +39,7 @@ const Index = () => {
         </div>
 
         {/* Main 3D Letter Box */}
-        <div className="relative w-full h-full max-w-4xl max-h-3xl">
+        <div className="relative w-full h-full max-w-4xl max-h-3xl overflow-visible">
           <InteractiveLetterBox 
             className="letter-float" 
             isOpen={isOpen}
@@ -54,7 +54,7 @@ const Index = () => {
               </div>
               
               {/* Scroll bar */}
-              <div className="relative h-48 w-8 bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden">
+              <div className="relative h-48 w-8 md:w-8 sm:w-12 bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden">
                 <input
                   type="range"
                   min="0"
@@ -62,19 +62,21 @@ const Index = () => {
                   defaultValue="50"
                   orient="vertical"
                   className="absolute w-full h-full bg-transparent appearance-none cursor-pointer
-                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-15 [&::-webkit-slider-thumb]:h-15
+                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-12
                            [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-lg [&::-webkit-slider-thumb]:shadow-lg
                            [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-pointer
                            [&::-webkit-slider-track]:bg-white [&::-webkit-slider-track]:rounded-lg [&::-webkit-slider-track]:h-full
                            [&::-webkit-slider-runnable-track]:bg-white
                            [&::-webkit-slider-progress]:bg-white
-                           [&::-moz-range-thumb]:w-15 [&::-moz-range-thumb]:h-15 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:rounded-lg
+                           [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-12 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:rounded-lg
                            [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none
                            [&::-moz-range-track]:bg-white [&::-moz-range-track]:rounded-lg
                            [&::-moz-range-progress]:bg-white
                            [&::-ms-track]:bg-white
                            [&::-ms-fill-lower]:bg-white
-                           [&::-ms-fill-upper]:bg-white"
+                           [&::-ms-fill-upper]:bg-white
+                           sm:[&::-webkit-slider-thumb]:w-10 sm:[&::-webkit-slider-thumb]:h-16
+                           sm:[&::-moz-range-thumb]:w-10 sm:[&::-moz-range-thumb]:h-16"
                   style={{ 
                     writingMode: 'bt-lr',
                     WebkitAppearance: 'slider-vertical',
@@ -100,7 +102,7 @@ const Index = () => {
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-4">
             {!isOpen && (
               <p className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50">
-                ลากเพื่อหมุน • ซูมเพื่อขยายภาพ
+                ລາກເພື່ອໝຸນ • ຊູມເພື່ອຂະຫຍາຍຮູບ
               </p>
             )}
             {isOpen && scrollValue < 20 && (
@@ -108,7 +110,7 @@ const Index = () => {
                 onClick={handleMapClick}
                 className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
               >
-                📍 ดูแผนที่
+                📍 ເບິ່ງແຜນທີ່
               </div>
             )}
             <Button 

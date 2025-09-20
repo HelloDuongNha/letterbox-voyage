@@ -236,7 +236,7 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={25} />
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
         
         {/* Enhanced lighting setup */}
         <ambientLight intensity={0.6} />
