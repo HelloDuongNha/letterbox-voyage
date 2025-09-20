@@ -12,7 +12,7 @@ const Index = () => {
   };
 
   const handleMapClick = () => {
-    window.open('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7587.830424422392!2d102.62391383610688!3d18.02913810370906!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31245db46c923863%3A0xfc3decf4d300bdea!2sThavexok%20Development%20Construction%20Office!5e0!3m2!1svi!2s!4v1758390206753!5m2!1svi!2s', '_blank');
+    window.open('https://maps.app.goo.gl/biQyMC6f9BX1AyAJ6?g_st=ic', '_blank');
   };
   return (
     <>
