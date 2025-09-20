@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import * as React from "react";
 import { Canvas, useFrame, ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -25,9 +26,9 @@ const LetterBox = ({ isOpen, onButtonClick }: LetterBoxProps) => {
     onButtonClick();
   };
 
-  // Animation values based on open state
-  const topRotation = isOpen ? -Math.PI * 0.8 : 0;
-  const bottomRotation = isOpen ? Math.PI * 0.8 : 0;
+  // Animation values for envelope-style opening
+  const topFlapRotation = isOpen ? -Math.PI * 0.7 : 0;
+  const bottomFlapRotation = isOpen ? Math.PI * 0.7 : 0;
   const insideScale = isOpen ? [3, 1, 1] : [1, 1, 1];
   const insideOpacity = isOpen ? 1 : 0;
 
@@ -35,17 +36,49 @@ const LetterBox = ({ isOpen, onButtonClick }: LetterBoxProps) => {
     <group ref={groupRef} position={[0, 0, 0]}>
       {/* Main box container */}
       <group>
-        {/* Front face (red) */}
-        <mesh position={[0, 0, 0.05]} rotation={[0, 0, 0]}>
-          <planeGeometry args={[4, 2]} />
-          <meshStandardMaterial 
-            color="#dc2626" 
-            metalness={0.1} 
-            roughness={0.3}
-            transparent
-            opacity={isOpen ? 0.8 : 1}
-          />
-        </mesh>
+        {/* Front face (red) - Split into top and bottom flaps when opening */}
+        {!isOpen ? (
+          // Closed state - single red face
+          <mesh position={[0, 0, 0.05]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[4, 2]} />
+            <meshStandardMaterial 
+              color="#dc2626" 
+              metalness={0.1} 
+              roughness={0.3}
+            />
+          </mesh>
+        ) : (
+          // Open state - split into top and bottom flaps
+          <>
+            {/* Top flap - opens upward like envelope */}
+            <group position={[0, 0.5, 0]} rotation={[topFlapRotation, 0, 0]}>
+              <mesh position={[0, 0.5, 0.05]}>
+                <planeGeometry args={[4, 1]} />
+                <meshStandardMaterial 
+                  color="#dc2626" 
+                  metalness={0.1} 
+                  roughness={0.3}
+                  transparent
+                  opacity={0.9}
+                />
+              </mesh>
+            </group>
+
+            {/* Bottom flap - opens downward */}
+            <group position={[0, -0.5, 0]} rotation={[bottomFlapRotation, 0, 0]}>
+              <mesh position={[0, -0.5, 0.05]}>
+                <planeGeometry args={[4, 1]} />
+                <meshStandardMaterial 
+                  color="#dc2626" 
+                  metalness={0.1} 
+                  roughness={0.3}
+                  transparent
+                  opacity={0.9}
+                />
+              </mesh>
+            </group>
+          </>
+        )}
 
         {/* Back face (blue) */}
         <mesh position={[0, 0, -0.05]} rotation={[0, Math.PI, 0]}>
@@ -102,59 +135,22 @@ const LetterBox = ({ isOpen, onButtonClick }: LetterBoxProps) => {
         )}
       </group>
 
-      {/* Opening animation parts */}
+      {/* Yellow interior - extends to 3x length when fully open */}
       {isOpen && (
-        <>
-          {/* Top opening part */}
-          <group 
-            position={[0, 0.5, 0]} 
-            rotation={[topRotation, 0, 0]}
-          >
-            <mesh position={[0, 0.5, 0.05]}>
-              <planeGeometry args={[4, 1]} />
-              <meshStandardMaterial 
-                color="#dc2626" 
-                metalness={0.1} 
-                roughness={0.3}
-                transparent
-                opacity={0.8}
-              />
-            </mesh>
-          </group>
-
-          {/* Bottom opening part */}
-          <group 
-            position={[0, -0.5, 0]} 
-            rotation={[bottomRotation, 0, 0]}
-          >
-            <mesh position={[0, -0.5, 0.05]}>
-              <planeGeometry args={[4, 1]} />
-              <meshStandardMaterial 
-                color="#dc2626" 
-                metalness={0.1} 
-                roughness={0.3}
-                transparent
-                opacity={0.8}
-              />
-            </mesh>
-          </group>
-
-          {/* Yellow interior - extends to 3x length when fully open */}
-          <group scale={insideScale as [number, number, number]}>
-            <mesh position={[0, 0, 0]}>
-              <planeGeometry args={[4, 2]} />
-              <meshStandardMaterial 
-                color="#eab308" 
-                metalness={0.2} 
-                roughness={0.2}
-                transparent
-                opacity={insideOpacity}
-                emissive="#fbbf24"
-                emissiveIntensity={0.1}
-              />
-            </mesh>
-          </group>
-        </>
+        <group scale={insideScale as [number, number, number]}>
+          <mesh position={[0, 0, 0]}>
+            <planeGeometry args={[4, 2]} />
+            <meshStandardMaterial 
+              color="#eab308" 
+              metalness={0.2} 
+              roughness={0.2}
+              transparent
+              opacity={insideOpacity}
+              emissive="#fbbf24"
+              emissiveIntensity={0.1}
+            />
+          </mesh>
+        </group>
       )}
     </group>
   );
@@ -166,9 +162,30 @@ interface InteractiveLetterBoxProps {
 
 export const InteractiveLetterBox = ({ className }: InteractiveLetterBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [lastInteraction, setLastInteraction] = useState(Date.now());
 
   const handleButtonClick = () => {
     setIsOpen(!isOpen);
+    setLastInteraction(Date.now());
+  };
+
+  // Auto-close after 3 seconds of no interaction
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const checkAutoClose = () => {
+      if (Date.now() - lastInteraction > 3000) {
+        setIsOpen(false);
+      }
+    };
+
+    const interval = setInterval(checkAutoClose, 500);
+    return () => clearInterval(interval);
+  }, [isOpen, lastInteraction]);
+
+  // Track user interaction to reset auto-close timer
+  const handleInteraction = () => {
+    setLastInteraction(Date.now());
   };
 
   return (
@@ -199,6 +216,7 @@ export const InteractiveLetterBox = ({ className }: InteractiveLetterBoxProps) =
           minPolarAngle={Math.PI / 6}
           enableDamping
           dampingFactor={0.05}
+          onChange={handleInteraction}
         />
       </Canvas>
     </div>
