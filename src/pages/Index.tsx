@@ -180,40 +180,18 @@ const Index = () => {
     };
   }, []);
 
-  // Prevent context menu and long press
+  // Prevent context menu only (right click and long press menu)
   useEffect(() => {
     const preventContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       return false;
     };
 
-    const preventLongPress = (e: TouchEvent) => {
-      e.preventDefault();
-      return false;
-    };
-
-    const preventSelect = (e: Event) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // Prevent right click context menu
+    // Prevent right click context menu on web
     document.addEventListener('contextmenu', preventContextMenu);
-    
-    // Prevent long press on mobile
-    document.addEventListener('touchstart', preventLongPress, { passive: false });
-    document.addEventListener('touchend', preventLongPress, { passive: false });
-    
-    // Prevent text selection
-    document.addEventListener('selectstart', preventSelect);
-    document.addEventListener('dragstart', preventSelect);
 
     return () => {
       document.removeEventListener('contextmenu', preventContextMenu);
-      document.removeEventListener('touchstart', preventLongPress);
-      document.removeEventListener('touchend', preventLongPress);
-      document.removeEventListener('selectstart', preventSelect);
-      document.removeEventListener('dragstart', preventSelect);
     };
   }, []);
 
