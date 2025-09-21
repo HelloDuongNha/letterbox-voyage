@@ -191,6 +191,9 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
   const controlsRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
   const [cardPosition, setCardPosition] = useState([0, 0, 0]);
+  
+  // Detect mobile for enhanced lighting
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   // Camera control function
   React.useEffect(() => {
@@ -210,33 +213,42 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
       <Canvas>
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
-        {/* Enhanced lighting setup for reading */}
-        <ambientLight intensity={0.8} />
+        {/* Enhanced lighting setup for reading - mobile optimized */}
+        <ambientLight intensity={isMobile ? 1.2 : 0.8} />
         
-        {/* Main directional light from front - softer for reading */}
+        {/* Main directional light from front - brighter for mobile */}
         <directionalLight 
           position={[0, 0, 8]} 
-          intensity={0.9} 
+          intensity={isMobile ? 1.4 : 0.9} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
         
-        {/* Back lighting for when rotated */}
+        {/* Back lighting for when rotated - brighter for mobile */}
         <directionalLight 
           position={[0, 0, -8]} 
-          intensity={0.7} 
+          intensity={isMobile ? 1.0 : 0.7} 
         />
         
-        {/* Angled side lights for reading - avoid direct glare */}
-        <pointLight position={[8, 5, 5]} intensity={0.5} />
-        <pointLight position={[-8, 5, 5]} intensity={0.5} />
-        <pointLight position={[8, -5, 5]} intensity={0.5} />
-        <pointLight position={[-8, -5, 5]} intensity={0.5} />
+        {/* Angled side lights for reading - brighter for mobile */}
+        <pointLight position={[8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        <pointLight position={[8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
         
-        {/* Soft fill lights from top and bottom */}
-        <pointLight position={[0, 8, 3]} intensity={0.4} />
-        <pointLight position={[0, -8, 3]} intensity={0.4} />
+        {/* Soft fill lights from top and bottom - brighter for mobile */}
+        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.7 : 0.4} />
+        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.7 : 0.4} />
+        
+        {/* Additional mobile lighting for better visibility */}
+        {isMobile && (
+          <>
+            <pointLight position={[0, 0, 10]} intensity={0.6} />
+            <pointLight position={[5, 0, 5]} intensity={0.4} />
+            <pointLight position={[-5, 0, 5]} intensity={0.4} />
+          </>
+        )}
 
         <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} />
         
