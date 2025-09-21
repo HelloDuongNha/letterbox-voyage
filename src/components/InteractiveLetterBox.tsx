@@ -77,7 +77,7 @@ const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [n
           // Closed state - showing front texture
           <>
             {/* Front face when closed */}
-            <mesh position={[0, 0, 0.05]} rotation={[0, 0, 0]}>
+            <mesh position={[0, 0, 0.001]} rotation={[0, 0, 0]}>
               <planeGeometry args={[4, 2]} />
               <meshStandardMaterial 
                 map={frontTexture}
@@ -134,10 +134,10 @@ const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [n
               />
             </mesh>
 
-            {/* Bottom section - inside-bot front, white back */}
-            <group position={[0, -1, 0]}>
+            {/* Bottom section - inside-bot front, white back (moved behind mid) */}
+            <group position={[0, -1, 0.08]}>
               <group rotation={[bottomRotation, 0, 0]}>
-                <mesh position={[0, -1, 0.04]}>
+                <mesh position={[0, -1, -0.04]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideBotTexture}
@@ -146,7 +146,7 @@ const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [n
                     transparent={true}
                   />
                 </mesh>
-                <mesh position={[0, -1, 0.039]} rotation={[0, Math.PI, 0]}>
+                <mesh position={[0, -1, -0.041]} rotation={[0, Math.PI, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     color="#ffffff"
@@ -161,7 +161,7 @@ const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [n
 
         {/* Back face - only visible when closed */}
         {!isOpen && (
-          <mesh position={[0, 0, -0.05]} rotation={[0, Math.PI, 0]}>
+          <mesh position={[0, 0, -0.001]} rotation={[0, Math.PI, 0]}>
             <planeGeometry args={[4, 2]} />
             <meshStandardMaterial 
               map={backTexture}
@@ -173,34 +173,6 @@ const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [n
         )}
 
 
-        {/* Edges - only when closed */}
-        {!isOpen && (
-          <>
-            {/* Top edge */}
-            <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[4, 0.1]} />
-              <meshStandardMaterial color="#991b1b" />
-            </mesh>
-
-            {/* Bottom edge */}
-            <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[4, 0.1]} />
-              <meshStandardMaterial color="#991b1b" />
-            </mesh>
-
-            {/* Left edge */}
-            <mesh position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-              <planeGeometry args={[0.1, 2]} />
-              <meshStandardMaterial color="#991b1b" />
-            </mesh>
-
-            {/* Right edge */}
-            <mesh position={[2, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-              <planeGeometry args={[0.1, 2]} />
-              <meshStandardMaterial color="#991b1b" />
-            </mesh>
-          </>
-        )}
 
       </group>
 
@@ -217,13 +189,13 @@ interface InteractiveLetterBoxProps {
 export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: InteractiveLetterBoxProps) => {
   // isOpen is now controlled from parent component
   const controlsRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
   const [cardPosition, setCardPosition] = useState([0, 0, 0]);
 
   // Camera control function
   React.useEffect(() => {
     const handleCameraControl = (scrollValue: number) => {
-      // Smooth interpolation: 0-100 scroll maps to card position
-      // 0 = bottom (card up), 50 = middle, 100 = top (card down)
+      // Move the card instead of camera (back to original logic)
       const normalizedValue = scrollValue / 100; // 0 to 1
       const yPosition = (normalizedValue - 0.5) * -5; // -2.5 to +2.5, inverted
       setCardPosition([0, yPosition, 0]);
@@ -236,15 +208,15 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
-        {/* Enhanced lighting setup */}
-        <ambientLight intensity={0.6} />
+        {/* Enhanced lighting setup for reading */}
+        <ambientLight intensity={0.8} />
         
-        {/* Main directional light from front */}
+        {/* Main directional light from front - softer for reading */}
         <directionalLight 
-          position={[0, 0, 10]} 
-          intensity={1.2} 
+          position={[0, 0, 8]} 
+          intensity={0.9} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -252,17 +224,19 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
         
         {/* Back lighting for when rotated */}
         <directionalLight 
-          position={[0, 0, -10]} 
-          intensity={0.8} 
+          position={[0, 0, -8]} 
+          intensity={0.7} 
         />
         
-        {/* Side fill lights */}
-        <pointLight position={[10, 0, 0]} intensity={0.4} />
-        <pointLight position={[-10, 0, 0]} intensity={0.4} />
+        {/* Angled side lights for reading - avoid direct glare */}
+        <pointLight position={[8, 5, 5]} intensity={0.5} />
+        <pointLight position={[-8, 5, 5]} intensity={0.5} />
+        <pointLight position={[8, -5, 5]} intensity={0.5} />
+        <pointLight position={[-8, -5, 5]} intensity={0.5} />
         
-        {/* Top and bottom lights for even coverage */}
-        <pointLight position={[0, 10, 0]} intensity={0.3} />
-        <pointLight position={[0, -10, 0]} intensity={0.3} />
+        {/* Soft fill lights from top and bottom */}
+        <pointLight position={[0, 8, 3]} intensity={0.4} />
+        <pointLight position={[0, -8, 3]} intensity={0.4} />
 
         <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} />
         

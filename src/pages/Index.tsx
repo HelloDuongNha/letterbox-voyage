@@ -17,16 +17,45 @@ const Index = () => {
   };
 
   const handleFullscreen = () => {
+    // Check if we're on iOS Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    if (isIOS && isSafari) {
+      // For iOS Safari, show instruction to use "Add to Home Screen"
+      alert('ເພື່ອໃຊ້ງານແບບເຕັມຈໍ:\n1. ກົດປຸ່ມ Share (ລູກສອນຂຶ້ນ)\n2. ເລືອກ "Add to Home Screen"\n3. ເປີດຈາກໜ້າຈໍຫຼັກ');
+      return;
+    }
+
+    // Standard fullscreen API for other browsers
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
+      const element = document.documentElement;
+      
+      if (element.requestFullscreen) {
+        element.requestFullscreen().then(() => {
+          setIsFullscreen(true);
+        }).catch((err) => {
+          console.log('Error attempting to enable fullscreen:', err);
+        });
+      } else if ((element as any).webkitRequestFullscreen) {
+        (element as any).webkitRequestFullscreen();
         setIsFullscreen(true);
-      }).catch((err) => {
-        console.log('Error attempting to enable fullscreen:', err);
-      });
+      } else if ((element as any).msRequestFullscreen) {
+        (element as any).msRequestFullscreen();
+        setIsFullscreen(true);
+      }
     } else {
-      document.exitFullscreen().then(() => {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          setIsFullscreen(false);
+        });
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
         setIsFullscreen(false);
-      });
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+        setIsFullscreen(false);
+      }
     }
   };
 
@@ -46,25 +75,82 @@ const Index = () => {
     <>
       <OrientationWarning />
       
-      <main className="fixed inset-0 flex items-center justify-center overflow-visible">
-        {/* Background with subtle pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background opacity-90" />
-        
-        {/* Floating particles effect */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+      {/* Fixed background - completely independent */}
+      <div className="fixed inset-0 bg-gradient-to-br from-background via-card to-background opacity-90" />
+      
+      {/* Fixed floating particles - circular motion with hidden center */}
+      <div 
+        className="fixed pointer-events-none"
+        style={{
+          left: '120%', // Center point at bottom right outside viewport
+          top: '120%',  // Center point at bottom right outside viewport
+          width: '300vw',
+          height: '300vh',
+          animation: 'movingStars 120s linear infinite'
+        }}
+      >
+        {[...Array(300)].map((_, i) => {
+          const angle = (i / 300) * 2 * Math.PI; // Distribute many more stars in a circle
+          const radius = 60 + Math.random() * 100; // Closer to center for more visibility
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          
+          return (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-accent/20 rounded-full animate-pulse"
+              className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse opacity-80"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
+                left: `${50 + x}%`,
+                top: `${50 + y}%`,
+                animationDelay: `${Math.random() * 8}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+              }}
+            />
+          );
+        })}
+        {/* Additional layer with different sizes */}
+        {[...Array(200)].map((_, i) => {
+          const angle = (i / 200) * 2 * Math.PI;
+          const radius = 120 + Math.random() * 80;
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          
+          return (
+            <div
+              key={`layer2-${i}`}
+              className="absolute w-1 h-1 bg-yellow-200 rounded-full animate-pulse opacity-60"
+              style={{
+                left: `${50 + x}%`,
+                top: `${50 + y}%`,
+                animationDelay: `${Math.random() * 8}s`,
                 animationDuration: `${3 + Math.random() * 4}s`,
               }}
             />
-          ))}
-        </div>
+          );
+        })}
+        {/* Third layer with tiny stars */}
+        {[...Array(160)].map((_, i) => {
+          const angle = (i / 160) * 2 * Math.PI;
+          const radius = 180 + Math.random() * 60;
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          
+          return (
+            <div
+              key={`layer3-${i}`}
+              className="absolute w-0.5 h-0.5 bg-yellow-100 rounded-full animate-pulse opacity-40"
+              style={{
+                left: `${50 + x}%`,
+                top: `${50 + y}%`,
+                animationDelay: `${Math.random() * 8}s`,
+                animationDuration: `${4 + Math.random() * 3}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <main className="fixed inset-0 flex items-center justify-center overflow-visible">
 
         {/* Main 3D Letter Box */}
         <div className="relative w-full h-full max-w-4xl max-h-3xl overflow-visible">
