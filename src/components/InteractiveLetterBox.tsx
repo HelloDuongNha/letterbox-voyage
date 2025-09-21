@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import * as React from "react";
 import { Canvas, useFrame, ThreeEvent, useLoader } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
@@ -8,19 +8,33 @@ interface LetterBoxProps {
   isOpen: boolean;
 }
 
-const LetterBox = ({ isOpen, cardPosition }: { isOpen: boolean; cardPosition: [number, number, number] }) => {
+const LetterBox = ({ isOpen, cardPosition, onLoadComplete }: { 
+  isOpen: boolean; 
+  cardPosition: [number, number, number]; 
+  onLoadComplete?: () => void;
+}) => {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [animationPhase, setAnimationPhase] = useState(0); // 0: closed, 1: top opening, 2: bottom opening
+  const [texturesLoaded, setTexturesLoaded] = useState(0);
   
-  
-  // Load textures
+  // Load textures with progress tracking
   const frontTexture = useLoader(THREE.TextureLoader, '/front.png');
   const backTexture = useLoader(THREE.TextureLoader, '/back.png');
   const frontAfterTexture = useLoader(THREE.TextureLoader, '/front-after.png');
   const insideTopTexture = useLoader(THREE.TextureLoader, '/inside-top.png');
   const insideMidTexture = useLoader(THREE.TextureLoader, '/inside-mid.png');
   const insideBotTexture = useLoader(THREE.TextureLoader, '/inside-bot.png');
+
+  // Track texture loading completion
+  useEffect(() => {
+    if (frontTexture && backTexture && frontAfterTexture && 
+        insideTopTexture && insideMidTexture && insideBotTexture) {
+      setTimeout(() => {
+        onLoadComplete?.();
+      }, 500); // Small delay to ensure everything is rendered
+    }
+  }, [frontTexture, backTexture, frontAfterTexture, insideTopTexture, insideMidTexture, insideBotTexture, onLoadComplete]);
   
   // Smooth animation values
   const [topRotation, setTopRotation] = useState(Math.PI); // Start folded
@@ -184,9 +198,10 @@ interface InteractiveLetterBoxProps {
   className?: string;
   isOpen: boolean;
   onCameraControl?: (action: 'top' | 'middle' | 'bottom') => void;
+  onLoadComplete?: () => void;
 }
 
-export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: InteractiveLetterBoxProps) => {
+export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoadComplete }: InteractiveLetterBoxProps) => {
   // isOpen is now controlled from parent component
   const controlsRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
@@ -214,43 +229,43 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl }: Int
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
         {/* Enhanced lighting setup for reading - mobile optimized */}
-        <ambientLight intensity={isMobile ? 1.2 : 0.8} />
+        <ambientLight intensity={isMobile ? 1.0 : 0.8} />
         
-        {/* Main directional light from front - brighter for mobile */}
+        {/* Main reading light - PC position but shifted left and higher for mobile */}
         <directionalLight 
-          position={[0, 0, 8]} 
-          intensity={isMobile ? 1.4 : 0.9} 
+          position={isMobile ? [-2, 1, 8] : [0, 0, 8]} 
+          intensity={isMobile ? 0.9 : 0.9} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
         
-        {/* Back lighting for when rotated - brighter for mobile */}
+        {/* Back lighting for when rotated - bright for other angles */}
         <directionalLight 
           position={[0, 0, -8]} 
-          intensity={isMobile ? 1.0 : 0.7} 
+          intensity={isMobile ? 1.2 : 0.7} 
         />
         
-        {/* Angled side lights for reading - brighter for mobile */}
-        <pointLight position={[8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        {/* Angled side lights - bright for rotated views */}
+        <pointLight position={[8, 5, 5]} intensity={isMobile ? 1.0 : 0.5} />
+        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.4 : 0.5} />
+        <pointLight position={[8, -5, 5]} intensity={isMobile ? 1.0 : 0.5} />
+        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.4 : 0.5} />
         
-        {/* Soft fill lights from top and bottom - brighter for mobile */}
-        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.7 : 0.4} />
-        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.7 : 0.4} />
+        {/* Soft fill lights */}
+        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.5 : 0.4} />
+        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.5 : 0.4} />
         
-        {/* Additional mobile lighting for better visibility */}
+        {/* Additional angled lights for mobile - bright when rotated */}
         {isMobile && (
           <>
-            <pointLight position={[0, 0, 10]} intensity={0.6} />
-            <pointLight position={[5, 0, 5]} intensity={0.4} />
-            <pointLight position={[-5, 0, 5]} intensity={0.4} />
+            <pointLight position={[10, 0, 2]} intensity={0.9} />
+            <pointLight position={[5, 8, 3]} intensity={0.6} />
+            <pointLight position={[0, -10, 2]} intensity={0.7} />
           </>
         )}
 
-        <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} />
+        <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} onLoadComplete={onLoadComplete} />
         
         <OrbitControls 
           ref={controlsRef}

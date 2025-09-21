@@ -7,6 +7,8 @@ const Index = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrollValue, setScrollValue] = useState(50);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -15,6 +17,34 @@ const Index = () => {
   const handleMapClick = () => {
     window.open('https://maps.app.goo.gl/biQyMC6f9BX1AyAJ6?g_st=ic', '_blank');
   };
+
+  const handleLoadComplete = () => {
+    setIsLoading(false);
+  };
+
+  // Simulate loading progress
+  useEffect(() => {
+    if (isLoading) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 95) {
+            clearInterval(interval);
+            return 95; // Stop at 95%, wait for actual load complete
+          }
+          return prev + Math.random() * 5;
+        });
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [isLoading]);
+
+  // Complete loading when textures are ready
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingProgress(100);
+    }
+  }, [isLoading]);
 
   const handleFullscreen = () => {
     // Check if we're on mobile devices
@@ -88,6 +118,45 @@ const Index = () => {
       
       {/* Fixed background - completely independent */}
       <div className="fixed inset-0 bg-gradient-to-br from-background via-card to-background opacity-90" />
+      
+      {/* Loading Screen */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-background via-card to-background">
+          {/* Loading Text */}
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-2">ກຳລັງໂຫຼດ...</h2>
+            <p className="text-muted-foreground">ກະລຸນາລໍຖ້າ ກຳລັງກະກຽມບົດແຖນ</p>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="w-80 max-w-sm">
+            <div className="mb-2 flex justify-between text-sm text-muted-foreground">
+              <span>ຄວາມຄືບໜ້າ</span>
+              <span>{Math.round(loadingProgress)}%</span>
+            </div>
+            <div className="w-full bg-card/60 rounded-full h-3 overflow-hidden border border-border/50">
+              <div 
+                className="bg-gradient-to-r from-primary to-accent h-full rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+          </div>
+          
+          {/* Loading Animation */}
+          <div className="mt-8 flex space-x-2">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 bg-primary rounded-full animate-pulse"
+                style={{
+                  animationDelay: `${i * 0.2}s`,
+                  animationDuration: '1s',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Fixed floating particles - circular motion with hidden center */}
       <div 
@@ -168,6 +237,7 @@ const Index = () => {
           <InteractiveLetterBox 
             className="letter-float" 
             isOpen={isOpen}
+            onLoadComplete={handleLoadComplete}
           />
           
           {/* Scroll bar - only when open */}
