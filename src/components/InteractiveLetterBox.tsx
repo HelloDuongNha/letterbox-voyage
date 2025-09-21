@@ -233,7 +233,7 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
         {/* Enhanced lighting setup for reading - mobile optimized */}
-        <ambientLight intensity={isMobile ? 1.1 : 0.8} />
+        <ambientLight intensity={isMobile ? 1.3 : 0.8} />
         
         {/* Main reading light - shifted more to left for mobile to avoid glare */}
         <directionalLight 
@@ -268,11 +268,16 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.6 : 0.4} />
         <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.6 : 0.4} />
         
+        {/* Center soft lighting for better paper brightness - non-glaring */}
+        <pointLight position={[0, 0, 10]} intensity={isMobile ? 0.4 : 0.3} />
+        <pointLight position={[0, 2, 8]} intensity={isMobile ? 0.3 : 0.2} />
+        
         {/* Additional gentle left lighting for mobile */}
         {isMobile && (
           <>
             <pointLight position={[-5, 3, 6]} intensity={0.5} />
             <pointLight position={[-3, 6, 4]} intensity={0.4} />
+            <pointLight position={[2, 0, 9]} intensity={0.3} />
           </>
         )}
         
