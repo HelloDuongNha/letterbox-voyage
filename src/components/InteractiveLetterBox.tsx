@@ -232,67 +232,35 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
       >
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
-        {/* Enhanced lighting setup for reading - mobile optimized */}
-        <ambientLight intensity={isMobile ? 2.0 : 0.8} />
-        
-        {/* Main reading light - shifted more to left for mobile to avoid glare */}
-        <directionalLight 
-          position={isMobile ? [-4, 2, 6] : [0, 0, 8]} 
-          intensity={isMobile ? 1.0 : 0.9} 
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+        {/* Clean and bright lighting setup - optimized for readability */}
+        {/* HemisphereLight for natural overall illumination */}
+        <hemisphereLight 
+          skyColor={0xffffff} 
+          groundColor={0xb8b8b8} 
+          intensity={isMobile ? 1.2 : 1.0}
         />
         
-        {/* Soft left side light for mobile - provides brightness without glare */}
-        {isMobile && (
-          <directionalLight 
-            position={[-6, 4, 4]} 
-            intensity={0.8} 
-          />
-        )}
-        
-        {/* Back lighting for when rotated - reduced intensity */}
-        <directionalLight 
-          position={[0, 0, -8]} 
-          intensity={isMobile ? 0.9 : 0.7} 
+        {/* AmbientLight for even base lighting */}
+        <ambientLight 
+          color={0xffffff} 
+          intensity={isMobile ? 1.8 : 1.5} 
         />
         
-        {/* Angled side lights - more balanced */}
-        <pointLight position={[8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.9 : 0.5} />
-        <pointLight position={[8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.9 : 0.5} />
+        {/* Gentle DirectionalLight from top-left diagonal - no direct glare */}
+        <directionalLight 
+          position={[-4, 6, 4]} 
+          intensity={isMobile ? 0.8 : 0.6}
+          color={0xffffff}
+          castShadow={false}
+        />
         
-        {/* Soft fill lights from top and bottom */}
-        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.6 : 0.4} />
-        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.6 : 0.4} />
-        
-        {/* Center soft lighting for better paper brightness - non-glaring */}
-        <pointLight position={[0, 0, 6.2]} intensity={isMobile ? 1.2 : 0.7} />
-        <pointLight position={[0, 0.2, 6.1]} intensity={isMobile ? 1.1 : 0.6} />
-        <pointLight position={[0.1, -0.1, 6.2]} intensity={isMobile ? 1.0 : 0.6} />
-        <pointLight position={[-0.1, 0.1, 6.1]} intensity={isMobile ? 0.9 : 0.5} />
-        <pointLight position={[0, 0, 6.5]} intensity={isMobile ? 0.8 : 0.5} />
-        <pointLight position={[0, 0, 6.3]} intensity={isMobile ? 0.7 : 0.4} />
-        
-        {/* Additional gentle left lighting for mobile */}
-        {isMobile && (
-          <>
-            <pointLight position={[-5, 3, 6]} intensity={0.5} />
-            <pointLight position={[-3, 6, 4]} intensity={0.4} />
-            <pointLight position={[2, 0, 9]} intensity={0.3} />
-          </>
-        )}
-        
-        {/* Additional angled lights for mobile - bright when rotated */}
-        {isMobile && (
-          <>
-            <pointLight position={[10, 0, 2]} intensity={0.9} />
-            <pointLight position={[5, 8, 3]} intensity={0.6} />
-            <pointLight position={[0, -10, 2]} intensity={0.7} />
-          </>
-        )}
+        {/* Soft fill light from opposite side for balance */}
+        <directionalLight 
+          position={[3, 4, 5]} 
+          intensity={isMobile ? 0.6 : 0.4}
+          color={0xffffff}
+          castShadow={false}
+        />
 
         <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} onLoadComplete={onLoadComplete} />
         
