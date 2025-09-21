@@ -187,11 +187,36 @@ const Index = () => {
       return false;
     };
 
+    // Prevent long press context menu on Safari/iOS
+    const preventLongPressMenu = (e: TouchEvent) => {
+      // Only prevent if it's a long press (not a quick tap)
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const target = touch.target as HTMLElement;
+        
+        // Allow interaction with buttons and interactive elements
+        if (target.tagName === 'BUTTON' || 
+            target.tagName === 'INPUT' || 
+            target.closest('button') ||
+            target.closest('[role="button"]') ||
+            target.closest('.scroll-area')) {
+          return; // Allow normal interaction
+        }
+        
+        // Prevent context menu on other areas
+        e.preventDefault();
+      }
+    };
+
     // Prevent right click context menu on web
     document.addEventListener('contextmenu', preventContextMenu);
+    
+    // Prevent long press menu on mobile Safari
+    document.addEventListener('touchstart', preventLongPressMenu, { passive: false });
 
     return () => {
       document.removeEventListener('contextmenu', preventContextMenu);
+      document.removeEventListener('touchstart', preventLongPressMenu);
     };
   }, []);
 

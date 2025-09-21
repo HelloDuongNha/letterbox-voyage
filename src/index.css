@@ -110,6 +110,8 @@ All colors MUST be HSL for proper theming.
     overflow: hidden;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -webkit-text-size-adjust: none;
   }
 }
 
