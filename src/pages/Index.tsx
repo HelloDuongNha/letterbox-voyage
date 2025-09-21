@@ -66,6 +66,8 @@ const Index = () => {
 
   const handleOpenLetter = () => {
     setLetterState('opening');
+    // Reset scroll value when opening to ensure correct button visibility
+    setScrollValue(50);
     // Animation will complete in ~1060ms (560ms + 500ms), then show close button
     setTimeout(() => {
       setLetterState('open');
@@ -121,7 +123,16 @@ const Index = () => {
   };
 
   const handleMapClick = () => {
-    window.open('https://maps.app.goo.gl/biQyMC6f9BX1AyAJ6?g_st=ic', '_blank');
+    // Detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Mobile: use original link
+      window.open('https://maps.app.goo.gl/biQyMC6f9BX1AyAJ6?g_st=ipc', '_blank');
+    } else {
+      // PC/Desktop: use new link
+      window.open('https://maps.app.goo.gl/RhtYkL7w2ncQYXos5', '_blank');
+    }
   };
 
   const handleLoadComplete = () => {
@@ -281,43 +292,18 @@ const Index = () => {
     };
   }, []);
 
-  // Prevent context menu only (right click and long press menu)
+  // Prevent context menu only (right click and long press menu) - TEMPORARILY DISABLED
   useEffect(() => {
     const preventContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       return false;
     };
 
-    // Prevent long press context menu on Safari/iOS
-    const preventLongPressMenu = (e: TouchEvent) => {
-      // Only prevent if it's a long press (not a quick tap)
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        const target = touch.target as HTMLElement;
-        
-        // Allow interaction with buttons and interactive elements
-        if (target.tagName === 'BUTTON' || 
-            target.tagName === 'INPUT' || 
-            target.closest('button') ||
-            target.closest('[role="button"]') ||
-            target.closest('.scroll-area')) {
-          return; // Allow normal interaction
-        }
-        
-        // Prevent context menu on other areas
-        e.preventDefault();
-      }
-    };
-
-    // Prevent right click context menu on web
+    // Prevent right click context menu on web only
     document.addEventListener('contextmenu', preventContextMenu);
-    
-    // Prevent long press menu on mobile Safari
-    document.addEventListener('touchstart', preventLongPressMenu, { passive: false });
 
     return () => {
       document.removeEventListener('contextmenu', preventContextMenu);
-      document.removeEventListener('touchstart', preventLongPressMenu);
     };
   }, []);
 
@@ -532,8 +518,9 @@ const Index = () => {
                 ລາກເພື່ອໝຸນ • ຊູມເພື່ອຂະຫຍາຍຮູບ
               </p>
             )}
-            {letterState === 'open' && scrollValue < 20 && (
+            {letterState === 'open' && scrollValue <= 20 && (
               <div 
+                key={`map-button-${scrollValue}`}
                 onClick={handleMapClick}
                 className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
               >

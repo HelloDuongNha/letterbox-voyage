@@ -249,7 +249,7 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
   const cameraRef = useRef<any>(null);
   const [cardPosition, setCardPosition] = useState([0, 0, 0]);
   
-  // Detect mobile for enhanced lighting
+  // Detect mobile for enhanced lighting and zoom settings
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   // Fast and responsive camera control
@@ -272,7 +272,7 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
         dpr={[1, 2]}
         performance={{ min: 0.8 }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={35} ref={cameraRef} />
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={isMobile ? 35 : 50} ref={cameraRef} />
         
         {/* Clean and bright lighting setup - optimized for readability */}
         {/* HemisphereLight for natural overall illumination */}
@@ -310,7 +310,7 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
           ref={controlsRef}
           enablePan={isOpen}
           enableZoom={true}
-          minDistance={2}
+          minDistance={isMobile ? 2 : 5}
           maxDistance={12}
           maxPolarAngle={Math.PI}
           minPolarAngle={0}
