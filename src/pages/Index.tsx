@@ -4,7 +4,7 @@ import { InteractiveLetterBox } from "@/components/InteractiveLetterBox";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [letterState, setLetterState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [scrollValue, setScrollValue] = useState(50);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,9 +14,65 @@ const Index = () => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const letterRef = useRef<any>(null);
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
+  const handleOpenLetter = () => {
+    setLetterState('opening');
+    // Animation will complete in ~1060ms (560ms + 500ms), then show close button
+    setTimeout(() => {
+      setLetterState('open');
+    }, 1060);
+  };
+
+  const handleCloseLetter = () => {
+    console.log("closing...");
+    
+    if (letterRef.current) {
+      // 1. Close the letter first (change to closed state immediately)
+      setLetterState('closing'); // This will show closed state
+      console.log("Letter closed");
+      
+      // Small delay to ensure closed state is rendered, then start rotation
+      setTimeout(() => {
+        // 2. Reset rotation and start rotation tween around Y axis
+        letterRef.current.rotation.set(0, 0, 0);
+        console.log("Starting rotation tween");
+        
+        const startRotation = 0; // Start from 0
+        const targetRotation = Math.PI * 2; // 1 full rotation
+        const duration = 800; // 0.8 seconds (faster)
+        const startTime = Date.now();
+        
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // EaseOutCubic - slow down towards the end
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          
+          letterRef.current.rotation.y = startRotation + (targetRotation - startRotation) * easeProgress;
+          
+          // Debug log rotation.y every frame
+          console.log(`Frame: rotation.y = ${letterRef.current.rotation.y.toFixed(3)}, progress = ${(progress * 100).toFixed(1)}%`);
+          
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            console.log("1-rotation tween completed!");
+            // 3. Change to final closed state and show open button
+            setLetterState('closed');
+          }
+        };
+        
+        animate();
+      }, 50); // Small delay to ensure state change is rendered
+      
+    } else {
+      // Fallback if ref not available
+      setTimeout(() => {
+        setLetterState('closed');
+      }, 100);
+    }
   };
 
   const handleMapClick = () => {
@@ -382,12 +438,13 @@ const Index = () => {
         <div className="relative w-full h-full max-w-4xl max-h-3xl overflow-visible">
           <InteractiveLetterBox 
             className="letter-float" 
-            isOpen={isOpen}
+            isOpen={letterState === 'opening' || letterState === 'open'}
             onLoadComplete={handleLoadComplete}
+            ref={letterRef}
           />
           
           {/* Scroll bar - only when open */}
-          {isOpen && (
+          {letterState === 'open' && (
             <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center gap-2">
               {/* Top indicator */}
               <div className="text-xs text-muted-foreground font-medium bg-card/80 backdrop-blur-sm px-2 py-1 rounded border border-border/50">
@@ -459,12 +516,12 @@ const Index = () => {
 
           {/* Instruction text and controls */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-4">
-            {!isOpen && (
+            {letterState === 'closed' && (
               <p className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50">
                 ລາກເພື່ອໝຸນ • ຊູມເພື່ອຂະຫຍາຍຮູບ
               </p>
             )}
-            {isOpen && scrollValue < 20 && (
+            {letterState === 'open' && scrollValue < 20 && (
               <div 
                 onClick={handleMapClick}
                 className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
@@ -472,12 +529,25 @@ const Index = () => {
                 📍 ເບິ່ງແຜນທີ່
               </div>
             )}
-            <Button 
-              onClick={handleToggle}
-              className="px-6 py-3 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-lg"
-            >
-              {isOpen ? "ປິດ" : "ເປີດ"}
-            </Button>
+            {/* Show Open Button when closed */}
+            {letterState === 'closed' && (
+              <Button 
+                onClick={handleOpenLetter}
+                className="px-6 py-3 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-lg transition-all duration-300"
+              >
+                ເປີດ
+              </Button>
+            )}
+            
+            {/* Show Close Button when open */}
+            {letterState === 'open' && (
+              <Button 
+                onClick={handleCloseLetter}
+                className="px-6 py-3 text-lg font-semibold bg-red-600 text-white hover:bg-red-700 rounded-full shadow-lg transition-all duration-300"
+              >
+                ປິດ
+              </Button>
+            )}
           </div>
         </div>
 

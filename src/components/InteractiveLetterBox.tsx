@@ -8,11 +8,11 @@ interface LetterBoxProps {
   isOpen: boolean;
 }
 
-const LetterBox = ({ isOpen, cardPosition, onLoadComplete }: { 
+const LetterBox = React.forwardRef<THREE.Group, { 
   isOpen: boolean; 
   cardPosition: [number, number, number]; 
   onLoadComplete?: () => void;
-}) => {
+}>(({ isOpen, cardPosition, onLoadComplete }, ref) => {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [animationPhase, setAnimationPhase] = useState(0); // 0: closed, 1: top opening, 2: bottom opening
@@ -36,21 +36,25 @@ const LetterBox = ({ isOpen, cardPosition, onLoadComplete }: {
     }
   }, [frontTexture, backTexture, frontAfterTexture, insideTopTexture, insideMidTexture, insideBotTexture, onLoadComplete]);
   
-  // Smooth animation values
+  // ==================== OPENING ANIMATION SYSTEM (DO NOT MODIFY) ====================
+  // This section handles the letter opening animation - DO NOT CHANGE
+  
+  // Smooth animation values for opening
   const [topRotation, setTopRotation] = useState(Math.PI); // Start folded
   const [bottomRotation, setBottomRotation] = useState(-Math.PI); // Start folded like top
 
-  useFrame((state, delta) => {
+  // Opening animation logic - PROTECTED SECTION
+  const handleOpeningAnimation = (state: any, delta: number) => {
     if (groupRef.current && !isOpen) {
       // Gentle floating animation when closed (always active)
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.1;
       groupRef.current.rotation.y += 0.002;
     }
 
-    // Smooth transitions
+    // Smooth transitions for opening
     const speed = 3; // Animation speed
     
-    // Opening animation only
+    // Opening animation targets
     const targetTopRotation = animationPhase >= 1 ? 0 : Math.PI;
     const targetBottomRotation = animationPhase >= 2 ? 0 : -Math.PI; // Stay folded until phase 2
     
@@ -63,24 +67,59 @@ const LetterBox = ({ isOpen, cardPosition, onLoadComplete }: {
       const diff = targetBottomRotation - prev;
       return prev + diff * speed * delta;
     });
+  };
 
-  });
+  // Opening sequence controller - PROTECTED SECTION
+  const triggerOpeningSequence = () => {
+    setAnimationPhase(1);
+    // Bottom starts opening when top is 70% open (0.7 * 800ms = 560ms)
+    setTimeout(() => {
+      setAnimationPhase(2);
+    }, 560);
+  };
 
-  // Simple opening animation only
+  // Opening effect handler - PROTECTED SECTION
   React.useEffect(() => {
     if (isOpen) {
-      setAnimationPhase(1);
-      // Bottom starts opening when top is 70% open (0.7 * 800ms = 560ms)
-      setTimeout(() => {
-        setAnimationPhase(2);
-      }, 560);
+      triggerOpeningSequence();
     } else {
-      setAnimationPhase(0);
-      // Reset positions when closing
-      setTopRotation(Math.PI);
-      setBottomRotation(-Math.PI);
+      // TODO: Add closing animation here (without affecting opening logic)
+      handleResetToClosedState();
     }
   }, [isOpen]);
+
+  // Reset to closed state - PROTECTED SECTION
+  const handleResetToClosedState = () => {
+    setAnimationPhase(0);
+    setTopRotation(Math.PI);
+    setBottomRotation(-Math.PI);
+  };
+
+  // ==================== END OPENING ANIMATION SYSTEM ====================
+
+  // ==================== CLOSING ANIMATION SYSTEM (TO BE IMPLEMENTED) ====================
+  // TODO: Add closing animation logic here
+  // This section will handle the letter closing animation
+  
+  // Placeholder for closing animation
+  const handleClosingAnimation = (state: any, delta: number) => {
+    // TODO: Implement closing animation logic here
+    // This should smoothly close the letter with reverse sequence
+  };
+
+  // ==================== END CLOSING ANIMATION SYSTEM ====================
+
+  // Main animation frame handler
+  useFrame((state, delta) => {
+    // Always run opening animation logic (protected)
+    handleOpeningAnimation(state, delta);
+    
+    // TODO: Add closing animation logic when implemented
+    // handleClosingAnimation(state, delta);
+  });
+
+  // Combine refs
+  React.useImperativeHandle(ref, () => groupRef.current);
 
   return (
     <group ref={groupRef} position={cardPosition as [number, number, number]}>
@@ -192,7 +231,9 @@ const LetterBox = ({ isOpen, cardPosition, onLoadComplete }: {
 
     </group>
   );
-};
+});
+
+LetterBox.displayName = 'LetterBox';
 
 interface InteractiveLetterBoxProps {
   className?: string;
@@ -201,7 +242,7 @@ interface InteractiveLetterBoxProps {
   onLoadComplete?: () => void;
 }
 
-export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoadComplete }: InteractiveLetterBoxProps) => {
+export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxProps>(({ className, isOpen, onCameraControl, onLoadComplete }, ref) => {
   // isOpen is now controlled from parent component
   const controlsRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
@@ -262,7 +303,7 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
           castShadow={false}
         />
 
-        <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} onLoadComplete={onLoadComplete} />
+        <LetterBox isOpen={isOpen} cardPosition={cardPosition as [number, number, number]} onLoadComplete={onLoadComplete} ref={ref} />
         
         <OrbitControls 
           ref={controlsRef}
@@ -280,4 +321,6 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
       </Canvas>
     </div>
   );
-};
+});
+
+InteractiveLetterBox.displayName = 'InteractiveLetterBox';
