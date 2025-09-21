@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { OrientationWarning } from "@/components/OrientationWarning";
 import { InteractiveLetterBox } from "@/components/InteractiveLetterBox";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,11 @@ const Index = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [texturesLoaded, setTexturesLoaded] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -19,25 +24,88 @@ const Index = () => {
   };
 
   const handleLoadComplete = () => {
-    setIsLoading(false);
+    setTexturesLoaded(true);
   };
 
-  // Simulate loading progress
+  // Audio loading and management
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const handleCanPlayThrough = () => {
+        setAudioLoaded(true);
+      };
+
+      const handleLoadStart = () => {
+        setAudioLoaded(false);
+      };
+
+      audio.addEventListener('canplaythrough', handleCanPlayThrough);
+      audio.addEventListener('loadstart', handleLoadStart);
+      audio.load(); // Start loading
+
+      return () => {
+        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+        audio.removeEventListener('loadstart', handleLoadStart);
+      };
+    }
+  }, []);
+
+  // Handle user interaction for audio
+  const handleUserInteraction = () => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+      const audio = audioRef.current;
+      if (audio && audioLoaded) {
+        audio.play().catch(err => {
+          console.log('Audio play failed:', err);
+        });
+      }
+    }
+  };
+
+  // Complete loading when both textures and audio are ready
+  useEffect(() => {
+    if (texturesLoaded && audioLoaded) {
+      setTimeout(() => {
+        setIsLoading(false);
+        setShowWelcomeScreen(true);
+      }, 500);
+    }
+  }, [texturesLoaded, audioLoaded]);
+
+  // Handle welcome screen interaction
+  const handleWelcomeClick = () => {
+    setUserInteracted(true);
+    setShowWelcomeScreen(false);
+    // Play music when user clicks "Xem thiệp"
+    const audio = audioRef.current;
+    if (audio) {
+      audio.play().catch(err => {
+        console.log('Audio play failed:', err);
+      });
+    }
+  };
+
+  // Simulate loading progress based on what's loaded
   useEffect(() => {
     if (isLoading) {
       const interval = setInterval(() => {
         setLoadingProgress(prev => {
-          if (prev >= 95) {
+          let maxProgress = 40; // Base progress
+          if (audioLoaded) maxProgress += 30; // Audio adds 30%
+          if (texturesLoaded) maxProgress += 30; // Textures add 30%
+          
+          if (prev >= maxProgress) {
             clearInterval(interval);
-            return 95; // Stop at 95%, wait for actual load complete
+            return maxProgress;
           }
-          return prev + Math.random() * 5;
+          return prev + Math.random() * 4;
         });
       }, 100);
 
       return () => clearInterval(interval);
     }
-  }, [isLoading]);
+  }, [isLoading, audioLoaded, texturesLoaded]);
 
   // Complete loading when textures are ready
   useEffect(() => {
@@ -116,6 +184,17 @@ const Index = () => {
     <>
       <OrientationWarning />
       
+      {/* Background Music */}
+      <audio 
+        ref={audioRef}
+        loop
+        preload="auto"
+        style={{ display: 'none' }}
+      >
+        <source src="/music.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+      
       {/* Fixed background - completely independent */}
       <div className="fixed inset-0 bg-gradient-to-br from-background via-card to-background opacity-90" />
       
@@ -126,6 +205,12 @@ const Index = () => {
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-bold text-foreground mb-2">ກຳລັງໂຫຼດ...</h2>
             <p className="text-muted-foreground">ກະລຸນາລໍຖ້າ ກຳລັງກະກຽມບົດແຖນ</p>
+            <div className="mt-2 text-xs text-muted-foreground/70">
+              {!audioLoaded && !texturesLoaded && "ກຳລັງໂຫຼດສຽງ ແລະ ຮູບພາບ..."}
+              {audioLoaded && !texturesLoaded && "ກຳລັງໂຫຼດຮູບພາບ..."}
+              {!audioLoaded && texturesLoaded && "ກຳລັງໂຫຼດສຽງ..."}
+              {audioLoaded && texturesLoaded && "ກຳລັງສຳເລັດ..."}
+            </div>
           </div>
           
           {/* Progress Bar */}
@@ -154,6 +239,38 @@ const Index = () => {
                 }}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Welcome Screen with Wedding Message */}
+      {showWelcomeScreen && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-background via-card to-background">
+          {/* Wedding Message */}
+          <div className="text-center mb-12 px-6 max-w-lg">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold text-foreground mb-4 font-serif">💕</h1>
+              <h2 className="text-3xl font-bold text-foreground mb-2">ຂໍເຊີນ</h2>
+              <p className="text-xl text-muted-foreground mb-4">ມາຮ່ວມແບ່ງປັນຄວາມສຸກ</p>
+            </div>
+            
+            <div className="bg-card/40 backdrop-blur-sm rounded-lg p-6 border border-border/50 mb-8">
+              <p className="text-lg text-foreground leading-relaxed mb-4">
+                ໃນວັນສຳຄັນຂອງພວກເຮົາ<br/>
+                ຂໍໃຫ້ທ່ານມາເປັນພະຍານ<br/>
+                ໃນຄວາມສຸກແລະຄວາມຮັກ
+              </p>
+              <div className="text-sm text-muted-foreground">
+                ດ້ວຍຄວາມຮັກແລະຄວາມເຄົາລົບ ❤️
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleWelcomeClick}
+              className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
+            >
+              🎉 ເບິ່ງບົດເຊີນ 🎉
+            </Button>
           </div>
         </div>
       )}
