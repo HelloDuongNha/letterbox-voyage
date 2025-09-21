@@ -17,17 +17,23 @@ const Index = () => {
   };
 
   const handleFullscreen = () => {
-    // Check if we're on iOS Safari
+    // Check if we're on mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     
-    if (isIOS && isSafari) {
-      // For iOS Safari, show instruction to use "Add to Home Screen"
-      alert('ເພື່ອໃຊ້ງານແບບເຕັມຈໍ:\n1. ກົດປຸ່ມ Share (ລູກສອນຂຶ້ນ)\n2. ເລືອກ "Add to Home Screen"\n3. ເປີດຈາກໜ້າຈໍຫຼັກ');
+    if (isMobile) {
+      if (isIOS && isSafari) {
+        // For iOS Safari, show instruction to use "Add to Home Screen"
+        alert('ເພື່ອໃຊ້ງານແບບເຕັມຈໍ:\n1. ກົດປຸ່ມ Share (ລູກສອນຂຶ້ນ)\n2. ເລືອກ "Add to Home Screen"\n3. ເປີດຈາກໜ້າຈໍຫຼັກ');
+      } else {
+        // For Android and other mobile browsers, show add to homescreen instruction
+        alert('ເພື່ອໃຊ້ງານແບບເຕັມຈໍ:\n1. ກົດເມນູ browser (3 ຈຸດ)\n2. ເລືອກ "Add to Home Screen"\n3. ເປີດຈາກໜ້າຈໍຫຼັກ');
+      }
       return;
     }
 
-    // Standard fullscreen API for other browsers
+    // For laptop/PC - use F11 fullscreen API
     if (!document.fullscreenElement) {
       const element = document.documentElement;
       
@@ -36,6 +42,8 @@ const Index = () => {
           setIsFullscreen(true);
         }).catch((err) => {
           console.log('Error attempting to enable fullscreen:', err);
+          // If fullscreen API fails, try to simulate F11 by hiding browser UI
+          alert('กดปุ่ม F11 เพื่อเข้าสู่โหมดเต็มจอ');
         });
       } else if ((element as any).webkitRequestFullscreen) {
         (element as any).webkitRequestFullscreen();
@@ -43,6 +51,9 @@ const Index = () => {
       } else if ((element as any).msRequestFullscreen) {
         (element as any).msRequestFullscreen();
         setIsFullscreen(true);
+      } else {
+        // Fallback: inform user to press F11
+        alert('กดปุ่ม F11 เพื่อเข้าสู่โหมดเต็มจอ');
       }
     } else {
       if (document.exitFullscreen) {
