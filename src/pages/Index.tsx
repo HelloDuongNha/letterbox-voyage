@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OrientationWarning } from "@/components/OrientationWarning";
 import { InteractiveLetterBox } from "@/components/InteractiveLetterBox";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrollValue, setScrollValue] = useState(50);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -14,6 +15,33 @@ const Index = () => {
   const handleMapClick = () => {
     window.open('https://maps.app.goo.gl/biQyMC6f9BX1AyAJ6?g_st=ic', '_blank');
   };
+
+  const handleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch((err) => {
+        console.log('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      });
+    }
+  };
+
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   return (
     <>
       <OrientationWarning />
@@ -97,6 +125,17 @@ const Index = () => {
               </div>
             </div>
           )}
+
+          {/* Fullscreen button - bottom left corner */}
+          <div className="absolute bottom-8 left-8">
+            <Button
+              onClick={handleFullscreen}
+              className="w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card text-foreground shadow-lg flex items-center justify-center"
+              size="sm"
+            >
+              {isFullscreen ? "⤓" : "⛶"}
+            </Button>
+          </div>
 
           {/* Instruction text and controls */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-4">
