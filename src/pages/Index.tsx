@@ -245,31 +245,57 @@ const Index = () => {
 
       {/* Welcome Screen with Wedding Message */}
       {showWelcomeScreen && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-background via-card to-background">
-          {/* Wedding Message */}
-          <div className="text-center mb-12 px-6 max-w-lg">
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold text-foreground mb-4 font-serif">💕</h1>
-              <h2 className="text-3xl font-bold text-foreground mb-2">ຂໍເຊີນ</h2>
-              <p className="text-xl text-muted-foreground mb-4">ມາຮ່ວມແບ່ງປັນຄວາມສຸກ</p>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-background via-card to-background p-4">
+          {/* Wedding Message - Responsive Layout */}
+          <div className="text-center max-w-sm md:max-w-lg w-full
+                          portrait:space-y-6 landscape:space-y-2 
+                          landscape:max-h-screen landscape:py-2">
+            
+            {/* Header - Compact on landscape */}
+            <div className="portrait:mb-6 landscape:mb-2">
+              <h1 className="portrait:text-4xl landscape:text-3xl font-bold text-foreground portrait:mb-4 landscape:mb-1 font-serif">💕</h1>
+              <h2 className="portrait:text-3xl landscape:text-2xl font-bold text-foreground portrait:mb-2 landscape:mb-1">ຂໍເຊີນ</h2>
+              <p className="portrait:text-xl landscape:text-lg text-muted-foreground portrait:mb-4 landscape:mb-2">ມາຮ່ວມແບ່ງປັນຄວາມສຸກ</p>
             </div>
             
-            <div className="bg-card/40 backdrop-blur-sm rounded-lg p-6 border border-border/50 mb-8">
-              <p className="text-lg text-foreground leading-relaxed mb-4">
+            {/* Message Card - Compact on landscape */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-lg 
+                            portrait:p-6 landscape:p-4 
+                            border border-border/50 
+                            portrait:mb-8 landscape:mb-4">
+              <p className="portrait:text-lg landscape:text-base text-foreground leading-relaxed portrait:mb-4 landscape:mb-2">
                 ໃນວັນສຳຄັນຂອງພວກເຮົາ<br/>
                 ຂໍໃຫ້ທ່ານມາເປັນພະຍານ<br/>
                 ໃນຄວາມສຸກແລະຄວາມຮັກ
               </p>
-              <div className="text-sm text-muted-foreground">
+              <div className="portrait:text-sm landscape:text-xs text-muted-foreground">
                 ດ້ວຍຄວາມຮັກແລະຄວາມເຄົາລົບ ❤️
               </div>
             </div>
 
+            {/* Call-to-Action Button - Clean and elegant with mobile auto animation */}
             <Button 
               onClick={handleWelcomeClick}
-              className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
+              className="px-8 py-4 text-lg font-semibold 
+                        bg-gradient-to-r from-primary to-accent 
+                        text-primary-foreground 
+                        hover:from-primary/90 hover:to-accent/90 
+                        rounded-full shadow-lg 
+                        transition-all duration-500 ease-in-out
+                        transform hover:scale-105 active:scale-95
+                        hover:shadow-xl hover:shadow-primary/25
+                        border border-accent/20 hover:border-accent/40
+                        md:animate-none animate-pulse
+                        md:hover:animate-none hover:animate-none"
+              style={{
+                animationDuration: '2s'
+              }}
             >
-              🎉 ເບິ່ງບົດເຊີນ 🎉
+              <span className="flex items-center gap-2">
+                <span className="animate-bounce" style={{ animationDuration: '1.8s', animationDelay: '0s' }}>🎉</span>
+                <span>ເບິ່ງບົດເຊີນ</span>
+                <span className="animate-bounce" style={{ animationDuration: '1.8s', animationDelay: '0.4s' }}>🎉</span>
+              </span>
             </Button>
           </div>
         </div>
