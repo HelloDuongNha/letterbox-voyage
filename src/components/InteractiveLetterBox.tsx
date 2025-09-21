@@ -230,7 +230,7 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         dpr={[1, 2]}
         performance={{ min: 0.8 }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={35} ref={cameraRef} />
         
         {/* Clean and bright lighting setup - optimized for readability */}
         {/* HemisphereLight for natural overall illumination */}
@@ -268,8 +268,8 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
           ref={controlsRef}
           enablePan={isOpen}
           enableZoom={true}
-          minDistance={2}
-          maxDistance={50}
+          minDistance={3}
+          maxDistance={12}
           maxPolarAngle={Math.PI}
           minPolarAngle={0}
           enableDamping

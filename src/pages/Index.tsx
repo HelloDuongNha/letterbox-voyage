@@ -324,7 +324,6 @@ const Index = () => {
                         transition-all duration-500 ease-in-out
                         transform hover:scale-105 active:scale-95
                         hover:shadow-xl hover:shadow-primary/25
-                        border border-accent/20 hover:border-accent/40
                         md:animate-none animate-pulse
                         md:hover:animate-none hover:animate-none"
               style={{
