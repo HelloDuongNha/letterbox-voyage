@@ -229,12 +229,12 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
         {/* Enhanced lighting setup for reading - mobile optimized */}
-        <ambientLight intensity={isMobile ? 1.0 : 0.8} />
+        <ambientLight intensity={isMobile ? 1.3 : 0.8} />
         
         {/* Main reading light - PC position but shifted left and higher for mobile */}
         <directionalLight 
           position={isMobile ? [-2, 1, 8] : [0, 0, 8]} 
-          intensity={isMobile ? 0.9 : 0.9} 
+          intensity={isMobile ? 1.2 : 0.9} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -243,18 +243,18 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         {/* Back lighting for when rotated - bright for other angles */}
         <directionalLight 
           position={[0, 0, -8]} 
-          intensity={isMobile ? 1.2 : 0.7} 
+          intensity={isMobile ? 1.4 : 0.7} 
         />
         
         {/* Angled side lights - bright for rotated views */}
-        <pointLight position={[8, 5, 5]} intensity={isMobile ? 1.0 : 0.5} />
-        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.4 : 0.5} />
-        <pointLight position={[8, -5, 5]} intensity={isMobile ? 1.0 : 0.5} />
-        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.4 : 0.5} />
+        <pointLight position={[8, 5, 5]} intensity={isMobile ? 1.2 : 0.5} />
+        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.6 : 0.5} />
+        <pointLight position={[8, -5, 5]} intensity={isMobile ? 1.2 : 0.5} />
+        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.6 : 0.5} />
         
         {/* Soft fill lights */}
-        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.5 : 0.4} />
-        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.5 : 0.4} />
+        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.7 : 0.4} />
+        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.7 : 0.4} />
         
         {/* Additional angled lights for mobile - bright when rotated */}
         {isMobile && (
