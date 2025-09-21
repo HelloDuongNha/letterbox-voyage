@@ -237,19 +237,19 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         <hemisphereLight 
           skyColor={0xffffff} 
           groundColor={0xb8b8b8} 
-          intensity={isMobile ? 1.2 : 1.0}
+          intensity={isMobile ? 1.0 : 0.9}
         />
         
         {/* AmbientLight for even base lighting */}
         <ambientLight 
           color={0xffffff} 
-          intensity={isMobile ? 1.8 : 1.5} 
+          intensity={isMobile ? 1.4 : 1.2} 
         />
         
         {/* Gentle DirectionalLight from top-left diagonal - no direct glare */}
         <directionalLight 
           position={[-4, 6, 4]} 
-          intensity={isMobile ? 0.8 : 0.6}
+          intensity={isMobile ? 0.6 : 0.5}
           color={0xffffff}
           castShadow={false}
         />
@@ -257,7 +257,7 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
         {/* Soft fill light from opposite side for balance */}
         <directionalLight 
           position={[3, 4, 5]} 
-          intensity={isMobile ? 0.6 : 0.4}
+          intensity={isMobile ? 0.4 : 0.3}
           color={0xffffff}
           castShadow={false}
         />
