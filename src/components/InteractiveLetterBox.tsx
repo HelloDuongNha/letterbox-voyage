@@ -210,10 +210,10 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
   // Detect mobile for enhanced lighting
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  // Camera control function
+  // Fast and responsive camera control
   React.useEffect(() => {
     const handleCameraControl = (scrollValue: number) => {
-      // Move the card instead of camera (back to original logic)
+      // Instant response - no smoothing
       const normalizedValue = scrollValue / 100; // 0 to 1
       const yPosition = (normalizedValue - 0.5) * -5; // -2.5 to +2.5, inverted
       setCardPosition([0, yPosition, 0]);
@@ -225,36 +225,56 @@ export const InteractiveLetterBox = ({ className, isOpen, onCameraControl, onLoa
 
   return (
     <div className={`w-full h-full ${className}`}>
-      <Canvas>
+      <Canvas
+        frameloop="always"
+        dpr={[1, 2]}
+        performance={{ min: 0.8 }}
+      >
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} ref={cameraRef} />
         
         {/* Enhanced lighting setup for reading - mobile optimized */}
-        <ambientLight intensity={isMobile ? 1.3 : 0.8} />
+        <ambientLight intensity={isMobile ? 1.1 : 0.8} />
         
-        {/* Main reading light - PC position but shifted left and higher for mobile */}
+        {/* Main reading light - shifted more to left for mobile to avoid glare */}
         <directionalLight 
-          position={isMobile ? [-2, 1, 8] : [0, 0, 8]} 
-          intensity={isMobile ? 1.2 : 0.9} 
+          position={isMobile ? [-4, 2, 6] : [0, 0, 8]} 
+          intensity={isMobile ? 1.0 : 0.9} 
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
         
-        {/* Back lighting for when rotated - bright for other angles */}
+        {/* Soft left side light for mobile - provides brightness without glare */}
+        {isMobile && (
+          <directionalLight 
+            position={[-6, 4, 4]} 
+            intensity={0.8} 
+          />
+        )}
+        
+        {/* Back lighting for when rotated - reduced intensity */}
         <directionalLight 
           position={[0, 0, -8]} 
-          intensity={isMobile ? 1.4 : 0.7} 
+          intensity={isMobile ? 0.9 : 0.7} 
         />
         
-        {/* Angled side lights - bright for rotated views */}
-        <pointLight position={[8, 5, 5]} intensity={isMobile ? 1.2 : 0.5} />
-        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.6 : 0.5} />
-        <pointLight position={[8, -5, 5]} intensity={isMobile ? 1.2 : 0.5} />
-        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.6 : 0.5} />
+        {/* Angled side lights - more balanced */}
+        <pointLight position={[8, 5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        <pointLight position={[-8, 5, 5]} intensity={isMobile ? 0.9 : 0.5} />
+        <pointLight position={[8, -5, 5]} intensity={isMobile ? 0.8 : 0.5} />
+        <pointLight position={[-8, -5, 5]} intensity={isMobile ? 0.9 : 0.5} />
         
-        {/* Soft fill lights */}
-        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.7 : 0.4} />
-        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.7 : 0.4} />
+        {/* Soft fill lights from top and bottom */}
+        <pointLight position={[0, 8, 3]} intensity={isMobile ? 0.6 : 0.4} />
+        <pointLight position={[0, -8, 3]} intensity={isMobile ? 0.6 : 0.4} />
+        
+        {/* Additional gentle left lighting for mobile */}
+        {isMobile && (
+          <>
+            <pointLight position={[-5, 3, 6]} intensity={0.5} />
+            <pointLight position={[-3, 6, 4]} intensity={0.4} />
+          </>
+        )}
         
         {/* Additional angled lights for mobile - bright when rotated */}
         {isMobile && (

@@ -301,76 +301,40 @@ const Index = () => {
         </div>
       )}
       
-      {/* Fixed floating particles - circular motion with hidden center */}
+      {/* Fixed floating particles - streaming effect with viewport clipping */}
       <div 
-        className="fixed pointer-events-none"
-        style={{
-          left: '120%', // Center point at bottom right outside viewport
-          top: '120%',  // Center point at bottom right outside viewport
-          width: '300vw',
-          height: '300vh',
-          animation: 'movingStars 120s linear infinite'
-        }}
+        className="fixed inset-0 overflow-hidden pointer-events-none"
       >
-        {[...Array(300)].map((_, i) => {
-          const angle = (i / 300) * 2 * Math.PI; // Distribute many more stars in a circle
-          const radius = 60 + Math.random() * 100; // Closer to center for more visibility
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          
-          return (
-            <div
-              key={i}
-              className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse opacity-80"
-              style={{
-                left: `${50 + x}%`,
-                top: `${50 + y}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-              }}
-            />
-          );
-        })}
-        {/* Additional layer with different sizes */}
-        {[...Array(200)].map((_, i) => {
-          const angle = (i / 200) * 2 * Math.PI;
-          const radius = 120 + Math.random() * 80;
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          
-          return (
-            <div
-              key={`layer2-${i}`}
-              className="absolute w-1 h-1 bg-yellow-200 rounded-full animate-pulse opacity-60"
-              style={{
-                left: `${50 + x}%`,
-                top: `${50 + y}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${3 + Math.random() * 4}s`,
-              }}
-            />
-          );
-        })}
-        {/* Third layer with tiny stars */}
-        {[...Array(160)].map((_, i) => {
-          const angle = (i / 160) * 2 * Math.PI;
-          const radius = 180 + Math.random() * 60;
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          
-          return (
-            <div
-              key={`layer3-${i}`}
-              className="absolute w-0.5 h-0.5 bg-yellow-100 rounded-full animate-pulse opacity-40"
-              style={{
-                left: `${50 + x}%`,
-                top: `${50 + y}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${4 + Math.random() * 3}s`,
-              }}
-            />
-          );
-        })}
+        <div 
+          className="absolute"
+          style={{
+            left: '0%', // Much closer center point
+            top: '-100%',  // Much closer center point
+            width: '300vw',
+            height: '300vh',
+            animation: 'movingStars 200s linear infinite'
+          }}
+        >
+          {[...Array(120)].map((_, i) => {
+            // Create dense diagonal stream
+            const angle = (i / 120) * 2 * Math.PI;
+            const radius = 40 + Math.random() * 70; // Larger radius: 40-120px
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            
+            return (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-90"
+                style={{
+                  left: `${50 + x}%`,
+                  top: `${50 + y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <main className="fixed inset-0 flex items-center justify-center overflow-visible">
@@ -388,7 +352,7 @@ const Index = () => {
             <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center gap-2">
               {/* Top indicator */}
               <div className="text-xs text-muted-foreground font-medium bg-card/80 backdrop-blur-sm px-2 py-1 rounded border border-border/50">
-                TOP
+                ເທິງ
               </div>
               
               {/* Scroll bar */}
@@ -421,7 +385,14 @@ const Index = () => {
                     width: '100%',
                     height: '100%'
                   }}
+                  onInput={(e) => {
+                    const value = parseInt(e.target.value);
+                    setScrollValue(value);
+                    // Use onInput for real-time updates + RAF throttling
+                    (window as any).handleCameraControl?.(value);
+                  }}
                   onChange={(e) => {
+                    // Keep onChange for compatibility
                     const value = parseInt(e.target.value);
                     setScrollValue(value);
                     (window as any).handleCameraControl?.(value);
@@ -431,7 +402,7 @@ const Index = () => {
               
               {/* Bottom indicator */}
               <div className="text-xs text-muted-foreground font-medium bg-card/80 backdrop-blur-sm px-2 py-1 rounded border border-border/50">
-                BOT
+                ລຸ່ມ
               </div>
             </div>
           )}
@@ -466,7 +437,7 @@ const Index = () => {
               onClick={handleToggle}
               className="px-6 py-3 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-lg"
             >
-              {isOpen ? "Close" : "Open"}
+              {isOpen ? "ປິດ" : "ເປີດ"}
             </Button>
           </div>
         </div>
