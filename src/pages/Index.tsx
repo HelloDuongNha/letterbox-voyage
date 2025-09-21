@@ -1,7 +1,55 @@
-import { useState, useEffect, useRef } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useRef, useMemo } from "react";
 import { OrientationWarning } from "@/components/OrientationWarning";
 import { InteractiveLetterBox } from "@/components/InteractiveLetterBox";
 import { Button } from "@/components/ui/button";
+import { Group } from "three";
+
+// Memoized star background component to prevent re-render issues
+const StarBackground = () => {
+  // Generate star positions once and memoize them
+  const stars = useMemo(() => {
+    return [...Array(120)].map((_, i) => {
+      const angle = (i / 120) * 2 * Math.PI;
+      const radius = 40 + Math.random() * 70;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      return {
+        id: i,
+        left: `${50 + x}%`,
+        top: `${50 + y}%`
+      };
+    });
+  }, []); // Empty dependency array - only create once
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div 
+        className="absolute"
+        style={{
+          left: '0%',
+          top: '-100%',
+          width: '300vw',
+          height: '300vh',
+          animation: 'movingStars 200s linear infinite'
+        }}
+      >
+        {stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-90"
+            style={{
+              left: star.left,
+              top: star.top,
+              transform: 'translate(-50%, -50%)'
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Index = () => {
   const [letterState, setLetterState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
@@ -14,7 +62,7 @@ const Index = () => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const letterRef = useRef<any>(null);
+  const letterRef = useRef<Group>(null);
 
   const handleOpenLetter = () => {
     setLetterState('opening');
@@ -35,7 +83,7 @@ const Index = () => {
       // Small delay to ensure closed state is rendered, then start rotation
       setTimeout(() => {
         // 2. Reset rotation and start rotation tween around Y axis
-        letterRef.current.rotation.set(0, 0, 0);
+        letterRef.current!.rotation.set(0, 0, 0);
         console.log("Starting rotation tween");
         
         const startRotation = 0; // Start from 0
@@ -50,10 +98,7 @@ const Index = () => {
           // EaseOutCubic - slow down towards the end
           const easeProgress = 1 - Math.pow(1 - progress, 3);
           
-          letterRef.current.rotation.y = startRotation + (targetRotation - startRotation) * easeProgress;
-          
-          // Debug log rotation.y every frame
-          console.log(`Frame: rotation.y = ${letterRef.current.rotation.y.toFixed(3)}, progress = ${(progress * 100).toFixed(1)}%`);
+          letterRef.current!.rotation.y = startRotation + (targetRotation - startRotation) * easeProgress;
           
           if (progress < 1) {
             requestAnimationFrame(animate);
@@ -396,41 +441,7 @@ const Index = () => {
         </div>
       )}
       
-      {/* Fixed floating particles - streaming effect with viewport clipping */}
-      <div 
-        className="fixed inset-0 overflow-hidden pointer-events-none"
-      >
-        <div 
-          className="absolute"
-          style={{
-            left: '0%', // Much closer center point
-            top: '-100%',  // Much closer center point
-            width: '300vw',
-            height: '300vh',
-            animation: 'movingStars 200s linear infinite'
-          }}
-        >
-          {[...Array(120)].map((_, i) => {
-            // Create dense diagonal stream
-            const angle = (i / 120) * 2 * Math.PI;
-            const radius = 40 + Math.random() * 70; // Larger radius: 40-120px
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            
-            return (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-90"
-                style={{
-                  left: `${50 + x}%`,
-                  top: `${50 + y}%`,
-                  transform: 'translate(-50%, -50%)'
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <StarBackground />
 
       <main className="fixed inset-0 flex items-center justify-center overflow-visible">
 
@@ -482,7 +493,7 @@ const Index = () => {
                     height: '100%'
                   }}
                   onInput={(e) => {
-                    const value = parseInt(e.target.value);
+                    const value = parseInt((e.target as HTMLInputElement).value);
                     setScrollValue(value);
                     // Use onInput for real-time updates + RAF throttling
                     (window as any).handleCameraControl?.(value);

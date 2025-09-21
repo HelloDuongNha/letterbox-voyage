@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRef, useState, useMemo, useEffect } from "react";
 import * as React from "react";
 import { Canvas, useFrame, ThreeEvent, useLoader } from "@react-three/fiber";
@@ -46,9 +47,9 @@ const LetterBox = React.forwardRef<THREE.Group, {
   // Opening animation logic - PROTECTED SECTION
   const handleOpeningAnimation = (state: any, delta: number) => {
     if (groupRef.current && !isOpen) {
-      // Gentle floating animation when closed (always active)
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.1;
-      groupRef.current.rotation.y += 0.002;
+      // No floating animation - keep still
+      groupRef.current.position.y = 0;
+      // Removed auto rotation for better user control
     }
 
     // Smooth transitions for opening
@@ -276,7 +277,7 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
         {/* Clean and bright lighting setup - optimized for readability */}
         {/* HemisphereLight for natural overall illumination */}
         <hemisphereLight 
-          skyColor={0xffffff} 
+          color={0xffffff} 
           groundColor={0xb8b8b8} 
           intensity={isMobile ? 1.0 : 0.9}
         />
@@ -309,12 +310,13 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
           ref={controlsRef}
           enablePan={isOpen}
           enableZoom={true}
-          minDistance={3}
+          minDistance={2}
           maxDistance={12}
           maxPolarAngle={Math.PI}
           minPolarAngle={0}
           enableDamping
-          dampingFactor={0.05}
+          dampingFactor={0.15}
+          rotateSpeed={0.3}
           maxAzimuthAngle={Infinity}
           minAzimuthAngle={-Infinity}
         />
