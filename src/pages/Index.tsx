@@ -443,16 +443,22 @@ const Index = () => {
             ref={letterRef}
           />
           
-          {/* Scroll bar - only when open */}
+          {/* Scroll bar - only when open, responsive for landscape */}
           {letterState === 'open' && (
-            <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center gap-2">
+            <div className="absolute portrait:right-6 landscape:right-2 
+                            portrait:top-1/2 landscape:top-1/2 
+                            transform -translate-y-1/2 flex flex-col items-center 
+                            portrait:gap-2 landscape:gap-1">
               {/* Top indicator */}
-              <div className="text-xs text-muted-foreground font-medium bg-card/80 backdrop-blur-sm px-2 py-1 rounded border border-border/50">
+              <div className="portrait:text-xs landscape:text-[10px] text-muted-foreground font-medium bg-card/80 backdrop-blur-sm 
+                              portrait:px-2 landscape:px-1 portrait:py-1 landscape:py-0.5 
+                              rounded border border-border/50">
                 ເທິງ
               </div>
               
               {/* Scroll bar */}
-              <div className="relative h-48 w-8 md:w-8 sm:w-12 bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden">
+              <div className="relative portrait:h-48 landscape:h-32 portrait:w-8 landscape:w-6 
+                              bg-card/60 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden">
                 <input
                   type="range"
                   min="0"
@@ -460,21 +466,23 @@ const Index = () => {
                   defaultValue="50"
                   orient="vertical"
                   className="absolute w-full h-full bg-transparent appearance-none cursor-pointer
-                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-12
+                           [&::-webkit-slider-thumb]:appearance-none 
+                           portrait:[&::-webkit-slider-thumb]:w-7 landscape:[&::-webkit-slider-thumb]:w-5
+                           portrait:[&::-webkit-slider-thumb]:h-12 landscape:[&::-webkit-slider-thumb]:h-8
                            [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-lg [&::-webkit-slider-thumb]:shadow-lg
                            [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-pointer
                            [&::-webkit-slider-track]:bg-white [&::-webkit-slider-track]:rounded-lg [&::-webkit-slider-track]:h-full
                            [&::-webkit-slider-runnable-track]:bg-white
                            [&::-webkit-slider-progress]:bg-white
-                           [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-12 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:rounded-lg
+                           portrait:[&::-moz-range-thumb]:w-7 landscape:[&::-moz-range-thumb]:w-5
+                           portrait:[&::-moz-range-thumb]:h-12 landscape:[&::-moz-range-thumb]:h-8
+                           [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:rounded-lg
                            [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none
                            [&::-moz-range-track]:bg-white [&::-moz-range-track]:rounded-lg
                            [&::-moz-range-progress]:bg-white
                            [&::-ms-track]:bg-white
                            [&::-ms-fill-lower]:bg-white
-                           [&::-ms-fill-upper]:bg-white
-                           sm:[&::-webkit-slider-thumb]:w-10 sm:[&::-webkit-slider-thumb]:h-16
-                           sm:[&::-moz-range-thumb]:w-10 sm:[&::-moz-range-thumb]:h-16"
+                           [&::-ms-fill-upper]:bg-white"
                   style={{ 
                     writingMode: 'bt-lr',
                     WebkitAppearance: 'slider-vertical',
@@ -497,7 +505,9 @@ const Index = () => {
               </div>
               
               {/* Bottom indicator */}
-              <div className="text-xs text-muted-foreground font-medium bg-card/80 backdrop-blur-sm px-2 py-1 rounded border border-border/50">
+              <div className="portrait:text-xs landscape:text-[10px] text-muted-foreground font-medium bg-card/80 backdrop-blur-sm 
+                              portrait:px-2 landscape:px-1 portrait:py-1 landscape:py-0.5 
+                              rounded border border-border/50">
                 ລຸ່ມ
               </div>
             </div>
