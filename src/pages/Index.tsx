@@ -445,7 +445,7 @@ const Index = () => {
           
           {/* Scroll bar - only when open, responsive for landscape */}
           {letterState === 'open' && (
-            <div className="absolute portrait:right-6 landscape:right-2 
+            <div className="absolute portrait:right-12 landscape:right-6 
                             portrait:top-1/2 landscape:top-1/2 
                             transform -translate-y-1/2 flex flex-col items-center 
                             portrait:gap-2 landscape:gap-1">
