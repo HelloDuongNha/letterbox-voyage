@@ -377,24 +377,23 @@ const Index = () => {
       {/* Welcome Screen with Wedding Message */}
       {showWelcomeScreen && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-background via-card to-background p-4">
-          {/* Wedding Message - Responsive Layout */}
-          <div className="text-center max-w-sm md:max-w-lg w-full
-                          portrait:space-y-6 landscape:space-y-2 
-                          landscape:max-h-screen landscape:py-2">
+          {/* Wedding Message - Portrait vs Landscape responsive */}
+          <div className="text-center max-w-sm md:max-w-lg w-full 
+                          portrait:space-y-6 landscape:space-y-1">
             
-            {/* Header - Compact on landscape */}
-            <div className="portrait:mb-6 landscape:mb-2">
-              <h1 className="portrait:text-4xl landscape:text-3xl font-bold text-foreground portrait:mb-4 landscape:mb-1 font-serif">💕</h1>
-              <h2 className="portrait:text-3xl landscape:text-2xl font-bold text-foreground portrait:mb-2 landscape:mb-1">ຂໍເຊີນ</h2>
-              <p className="portrait:text-xl landscape:text-lg text-muted-foreground portrait:mb-4 landscape:mb-2">ມາຮ່ວມແບ່ງປັນຄວາມສຸກ</p>
+            {/* Header - Portrait: original size, Landscape: compact */}
+            <div className="portrait:mb-6 landscape:mb-1">
+              <h2 className="portrait:text-3xl landscape:text-xl font-bold text-foreground portrait:mb-2 landscape:mb-1">ຂໍເຊີນ</h2>
+              <p className="portrait:text-xl landscape:text-sm text-muted-foreground portrait:mb-4 landscape:mb-1">ມາຮ່ວມແບ່ງປັນຄວາມສຸກ</p>
             </div>
             
-            {/* Message Card - Compact on landscape */}
+            {/* Message Card - Tighter padding */}
             <div className="bg-card/40 backdrop-blur-sm rounded-lg 
-                            portrait:p-6 landscape:p-4 
+                            portrait:p-6 landscape:p-3
+                            portrait:px-6 landscape:px-4
                             border border-border/50 
-                            portrait:mb-8 landscape:mb-4">
-              <p className="portrait:text-lg landscape:text-base text-foreground leading-relaxed portrait:mb-4 landscape:mb-2">
+                            portrait:mb-8 landscape:mb-2">
+              <p className="portrait:text-lg landscape:text-sm text-foreground leading-relaxed portrait:mb-4 landscape:mb-2">
                 ໃນວັນສຳຄັນຂອງພວກເຮົາ<br/>
                 ຂໍໃຫ້ທ່ານມາເປັນພະຍານ<br/>
                 ໃນຄວາມສຸກແລະຄວາມຮັກ
@@ -404,10 +403,10 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Call-to-Action Button - Clean and elegant with mobile auto animation */}
+            {/* Call-to-Action Button */}
             <Button 
               onClick={handleWelcomeClick}
-              className="px-8 py-4 text-lg font-semibold 
+              className="portrait:px-8 landscape:px-4 portrait:py-4 landscape:py-2 portrait:text-lg landscape:text-base font-semibold 
                         bg-gradient-to-r from-primary to-accent 
                         text-primary-foreground 
                         hover:from-primary/90 hover:to-accent/90 
@@ -515,37 +514,32 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Instruction text and controls */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-4">
-            {letterState === 'closed' && (
-              <p className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50">
-                ລາກເພື່ອໝຸນ • ຊູມເພື່ອຂະຫຍາຍຮູບ
-              </p>
-            )}
+          {/* Controls - Positioned lower to avoid being cut off */}
+          <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-2 sm:gap-3 pb-safe">
             {letterState === 'open' && scrollValue <= mapThreshold && (
               <div 
                 key={`map-button-${scrollValue}`}
                 onClick={handleMapClick}
-                className="text-muted-foreground text-sm px-4 py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
+                className="text-muted-foreground text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
               >
                 📍 ເບິ່ງແຜນທີ່
               </div>
             )}
-            {/* Show Open Button when closed */}
+            
+            {/* Open/Close Button - Same position for both states */}
             {letterState === 'closed' && (
               <Button 
                 onClick={handleOpenLetter}
-                className="px-6 py-3 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-lg transition-all duration-300"
+                className="px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 text-base sm:text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-lg transition-all duration-300 min-w-[80px] sm:min-w-[100px]"
               >
                 ເປີດ
               </Button>
             )}
             
-            {/* Show Close Button when open */}
             {letterState === 'open' && (
               <Button 
                 onClick={handleCloseLetter}
-                className="px-6 py-3 text-lg font-semibold bg-red-600 text-white hover:bg-red-700 rounded-full shadow-lg transition-all duration-300"
+                className="px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 text-base sm:text-lg font-semibold bg-red-600 text-white hover:bg-red-700 rounded-full shadow-lg transition-all duration-300 min-w-[80px] sm:min-w-[100px]"
               >
                 ປິດ
               </Button>

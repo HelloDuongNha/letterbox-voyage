@@ -159,7 +159,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
                     transparent={true}
                   />
                 </mesh>
-                <mesh position={[0, animationPhase >= 1 ? 1 : 0, 0.039]} rotation={[0, Math.PI, 0]}>
+                <mesh position={[0, animationPhase >= 1 ? 1 : 0, -0.001]} rotation={[0, Math.PI, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={frontAfterTexture}
