@@ -150,7 +150,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
             {/* Top section - inside-top front, front-after back */}
             <group position={[0, 1, 0]}>
               <group rotation={[topRotation, 0, 0]}>
-                <mesh position={[0, 0.98, 0.04]}>
+                <mesh position={[0, 1, 0.04]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideTopTexture}
