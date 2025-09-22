@@ -76,10 +76,10 @@ const LetterBox = React.forwardRef<THREE.Group, {
     setTimeout(() => {
       setAnimationPhase(1);
     }, 100);
-    // Bottom starts opening when top is 70% open - increased timing for smoother sequence
+    // Bottom starts opening when top is 70% open - slightly faster bottom opening
     setTimeout(() => {
       setAnimationPhase(2);
-    }, 1100); // Adjusted for the initial delay
+    }, 900); // Reduced from 1100ms to 900ms for faster bottom opening
   };
 
   // Opening effect handler - PROTECTED SECTION
@@ -134,7 +134,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
           // Closed state - showing front texture
           <>
             {/* Front face when closed */}
-            <mesh position={[0, 0, 0.001]} rotation={[0, 0, 0]}>
+            <mesh position={[0, 0, 0.04]} rotation={[0, 0, 0]}>
               <planeGeometry args={[4, 2]} />
               <meshStandardMaterial 
                 map={frontTexture}
@@ -148,9 +148,9 @@ const LetterBox = React.forwardRef<THREE.Group, {
           // Open state - simple tri-fold paper
           <>
             {/* Top section - inside-top front, front-after back */}
-            <group position={[0, 1, 0]}>
+            <group position={[0, animationPhase >= 1 ? 1 : 0, 0.04]}>
               <group rotation={[topRotation, 0, 0]}>
-                <mesh position={[0, 1, 0.04]}>
+                <mesh position={[0, animationPhase >= 1 ? 1 : 0, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideTopTexture}
@@ -159,7 +159,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
                     transparent={true}
                   />
                 </mesh>
-                <mesh position={[0, 1, 0.039]} rotation={[0, Math.PI, 0]}>
+                <mesh position={[0, animationPhase >= 1 ? 1 : 0, -0.001]} rotation={[0, Math.PI, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={frontAfterTexture}
@@ -192,9 +192,9 @@ const LetterBox = React.forwardRef<THREE.Group, {
             </mesh>
 
             {/* Bottom section - inside-bot front, white back (moved behind mid) */}
-            <group position={[0, -1, 0.04]}>
+            <group position={[0, animationPhase >= 2 ? -1 : 0, 0.04]}>
               <group rotation={[bottomRotation, 0, 0]}>
-                <mesh position={[0, -1, -0]}>
+                <mesh position={[0, animationPhase >= 2 ? -1 : 0, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideBotTexture}
@@ -203,7 +203,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
                     transparent={true}
                   />
                 </mesh>
-                <mesh position={[0, -1, -0.041]} rotation={[0, Math.PI, 0]}>
+                <mesh position={[0, animationPhase >= 2 ? -1 : 0, -0.001]} rotation={[0, Math.PI, 0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     color="#ffffff"
@@ -218,7 +218,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
 
         {/* Back face - only visible when closed */}
         {!isOpen && (
-          <mesh position={[0, 0, -0.001]} rotation={[0, Math.PI, 0]}>
+          <mesh position={[0, 0, 0.039]} rotation={[0, Math.PI, 0]}>
             <planeGeometry args={[4, 2]} />
             <meshStandardMaterial 
               map={backTexture}
