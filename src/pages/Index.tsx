@@ -63,6 +63,10 @@ const Index = () => {
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const letterRef = useRef<Group>(null);
+  
+  // Detect mobile devices for map threshold
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const mapThreshold = isMobile ? 20 : 40;
 
   const handleOpenLetter = () => {
     setLetterState('opening');
@@ -518,7 +522,7 @@ const Index = () => {
                 ລາກເພື່ອໝຸນ • ຊູມເພື່ອຂະຫຍາຍຮູບ
               </p>
             )}
-            {letterState === 'open' && scrollValue <= 20 && (
+            {letterState === 'open' && scrollValue <= mapThreshold && (
               <div 
                 key={`map-button-${scrollValue}`}
                 onClick={handleMapClick}
