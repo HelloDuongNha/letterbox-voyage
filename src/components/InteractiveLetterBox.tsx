@@ -53,7 +53,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
     }
 
     // Smooth transitions for opening
-    const speed = 3; // Animation speed
+    const speed = 1.5; // Animation speed - slower for more graceful opening
     
     // Opening animation targets
     const targetTopRotation = animationPhase >= 1 ? 0 : Math.PI;
@@ -72,11 +72,14 @@ const LetterBox = React.forwardRef<THREE.Group, {
 
   // Opening sequence controller - PROTECTED SECTION
   const triggerOpeningSequence = () => {
-    setAnimationPhase(1);
-    // Bottom starts opening when top is 70% open (0.7 * 800ms = 560ms)
+    // Small delay to ensure initial state is fully rendered before animation starts
+    setTimeout(() => {
+      setAnimationPhase(1);
+    }, 100);
+    // Bottom starts opening when top is 70% open - increased timing for smoother sequence
     setTimeout(() => {
       setAnimationPhase(2);
-    }, 560);
+    }, 1100); // Adjusted for the initial delay
   };
 
   // Opening effect handler - PROTECTED SECTION
@@ -147,7 +150,7 @@ const LetterBox = React.forwardRef<THREE.Group, {
             {/* Top section - inside-top front, front-after back */}
             <group position={[0, 1, 0]}>
               <group rotation={[topRotation, 0, 0]}>
-                <mesh position={[0, 0.9, 0.04]}>
+                <mesh position={[0, 0.98, 0.04]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideTopTexture}
@@ -189,9 +192,9 @@ const LetterBox = React.forwardRef<THREE.Group, {
             </mesh>
 
             {/* Bottom section - inside-bot front, white back (moved behind mid) */}
-            <group position={[0, -1, 0.08]}>
+            <group position={[0, -1, 0.04]}>
               <group rotation={[bottomRotation, 0, 0]}>
-                <mesh position={[0, -0.9, -0.04]}>
+                <mesh position={[0, -1, -0]}>
                   <planeGeometry args={[4, 2]} />
                   <meshStandardMaterial 
                     map={insideBotTexture}
