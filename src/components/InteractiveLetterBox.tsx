@@ -277,6 +277,8 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
     };
   }, []);
 
+
+
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas

@@ -134,8 +134,8 @@ const Index = () => {
 
   const handleInstructionsClick = () => {
     const instructions = isMobile 
-      ? "Hướng dẫn sử dụng (Mobile):\n\nỞ bên ngoài thư:\n• Dùng 1 ngón để xoay xung quanh thư\n\nKhi mở thư:\n• Dùng 2 ngón để zoom in/out\n• Dùng 2 ngón để cuộn lên/xuống, trái/phải\n• Dùng 1 ngón để xoay xung quanh thư"
-      : "Hướng dẫn sử dụng (PC):\n\nỞ bên ngoài thư:\n• Giữ chuột trái và kéo để xoay xung quanh thư\n\nKhi mở thư:\n• Dùng thanh cuộn để cuộn lên/xuống\n• Giữ chuột trái và kéo để xoay xung quanh thư\n• Zoom: Scroll chuột (nếu có) hoặc 2 ngón trên touchpad";
+      ? "ຄໍາແນະນໍາການນໍາໃຊ້ (Mobile):\n\nຢູ່ນອກຈົດໝາຍ:\n• ໃຊ້ 2 ນິ້ວເພື່ອໝຸນອ້ອມຈົດໝາຍ\n\nເມື່ອເປີດຈົດໝາຍ:\n• ໃຊ້ 2 ນິ້ວເພື່ອ zoom in/out\n• ໃຊ້ 2 ນິ້ວເພື່ອຫຼິ້ນຂຶ້ນ/ລົງ, ຊ້າຍ/ຂວາ\n• ໃຊ້ 1 ນິ້ວເພື່ອໝຸນອ້ອມຈົດໝາຍ"
+      : "ຄໍາແນະນໍາການນໍາໃຊ້ (PC):\n\nຢູ່ນອກຈົດໝາຍ:\n• ກົດຄ້າງ mouse ຊ້າຍແລະລາກເພື່ອໝຸນອ້ອມຈົດໝາຍ\n\nເມື່ອເປີດຈົດໝາຍ:\n• ໃຊ້ແຖບເລື່ອນເພື່ອຫຼິ້ນຂຶ້ນ/ລົງ\n• ກົດຄ້າງ mouse ຊ້າຍແລະລາກເພື່ອໝຸນອ້ອມຈົດໝາຍ\n• Zoom: ຫຼິ້ນ mouse (ຖ້າມີ) ຫຼື 2 ນິ້ວເທິງ touchpad";
     
     setShowInstructions(true);
     alert(instructions);
@@ -484,7 +484,7 @@ const Index = () => {
                   min="0"
                   max="100"
                   defaultValue="50"
-                  orient="vertical"
+                  // orient="vertical"
                   className="absolute w-full h-full bg-transparent appearance-none cursor-pointer
                            [&::-webkit-slider-thumb]:appearance-none 
                            portrait:[&::-webkit-slider-thumb]:w-7 landscape:[&::-webkit-slider-thumb]:w-5
@@ -504,7 +504,7 @@ const Index = () => {
                            [&::-ms-fill-lower]:bg-white
                            [&::-ms-fill-upper]:bg-white"
                   style={{ 
-                    writingMode: 'bt-lr',
+                    writingMode: 'bt-lr' as any,
                     WebkitAppearance: 'slider-vertical',
                     width: '100%',
                     height: '100%'
@@ -557,11 +557,22 @@ const Index = () => {
 
           {/* Controls - Positioned lower to avoid being cut off */}
           <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-2 sm:gap-3 pb-safe">
-            {letterState === 'open' && scrollValue <= mapThreshold && (
+            {/* PC Map Button - only shows on PC with scroll condition */}
+            {letterState === 'open' && !isMobile && scrollValue <= mapThreshold && (
               <div 
                 key={`map-button-${scrollValue}`}
                 onClick={handleMapClick}
                 className="text-muted-foreground text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
+              >
+                📍 ເບິ່ງແຜນທີ່
+              </div>
+            )}
+            
+            {/* Mobile Map Button - simple, always shows when open on mobile */}
+            {letterState === 'open' && isMobile && (
+              <div 
+                onClick={handleMapClick}
+                className="text-muted-foreground text-xs px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
               >
                 📍 ເບິ່ງແຜນທີ່
               </div>
