@@ -62,7 +62,6 @@ const Index = () => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [showMapButton, setShowMapButton] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const letterRef = useRef<Group>(null);
   
@@ -146,68 +145,6 @@ const Index = () => {
       setShowInstructions(false);
     }, 10000);
   };
-
-  // Mobile gesture detection với useEffect
-  useEffect(() => {
-    if (!isMobile || letterState !== 'open') return;
-
-    const overlay = document.getElementById('mobile-gesture-overlay');
-    if (!overlay) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        console.log('2 fingers detected, enabling gesture detection');
-        // Enable pointer events khi có 2 ngón
-        overlay.style.pointerEvents = 'auto';
-        
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        
-        (overlay as any).startY1 = touch1.clientY;
-        (overlay as any).startY2 = touch2.clientY;
-        (overlay as any).gestureDetected = false;
-      }
-    };
-    
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2 && (overlay as any).startY1 !== undefined) {
-        e.preventDefault(); // Prevent default chỉ khi track 2 ngón
-        
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        
-        const moveY1 = touch1.clientY - (overlay as any).startY1;
-        const moveY2 = touch2.clientY - (overlay as any).startY2;
-        
-        console.log('Move distances:', moveY1, moveY2);
-        
-        if (moveY1 >= 50 && moveY2 >= 50 && !(overlay as any).gestureDetected) {
-          console.log('Gesture detected! Showing map button');
-          (overlay as any).gestureDetected = true;
-          setShowMapButton(true);
-        }
-      }
-    };
-    
-    const handleTouchEnd = (e: TouchEvent) => {
-      console.log('Touch end, disabling overlay');
-      // Disable pointer events để OrbitControls hoạt động
-      overlay.style.pointerEvents = 'none';
-      (overlay as any).startY1 = undefined;
-      (overlay as any).startY2 = undefined;
-      (overlay as any).gestureDetected = undefined;
-    };
-    
-    overlay.addEventListener('touchstart', handleTouchStart, { passive: false });
-    overlay.addEventListener('touchmove', handleTouchMove, { passive: false });
-    overlay.addEventListener('touchend', handleTouchEnd, { passive: true });
-    
-    return () => {
-      overlay.removeEventListener('touchstart', handleTouchStart);
-      overlay.removeEventListener('touchmove', handleTouchMove);
-      overlay.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [isMobile, letterState]);
 
   const handleMapClick = () => {
     // Detect mobile devices
@@ -526,16 +463,6 @@ const Index = () => {
             ref={letterRef}
           />
 
-          {/* Mobile Touch Overlay - minimal interference */}
-          {letterState === 'open' && isMobile && (
-            <div 
-              id="mobile-gesture-overlay"
-              className="absolute inset-0 pointer-events-none z-10"
-              style={{ 
-                background: 'transparent'
-              }}
-            />
-          )}
           
           {/* Scroll bar - only when open and not mobile, responsive for landscape */}
           {letterState === 'open' && !isMobile && (
@@ -664,17 +591,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Mobile Map Button - Bottom Right Corner (từ gesture) */}
-        {showMapButton && letterState === 'open' && isMobile && (
-          <div className="absolute bottom-8 right-8 z-20">
-            <div 
-              onClick={handleMapClick}
-              className="w-16 h-16 rounded-full bg-red-500/90 backdrop-blur-sm border-2 border-white cursor-pointer hover:bg-red-600/90 transition-all duration-300 flex items-center justify-center shadow-lg animate-pulse"
-            >
-              <span className="text-white text-2xl">📍</span>
-            </div>
-          </div>
-        )}
 
         {/* Corner decorations */}
         <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-accent/30 rounded-tl-lg" />
