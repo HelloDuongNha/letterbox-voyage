@@ -464,74 +464,21 @@ const Index = () => {
             ref={letterRef}
           />
 
-          {/* Mobile Touch Overlay - detect 2-finger swipe down gesture */}
+          {/* Mobile Touch Overlay - simple test */}
           {letterState === 'open' && isMobile && (
             <div 
-              className="absolute inset-0 pointer-events-none z-10"
+              className="absolute inset-0 z-10"
               style={{ 
-                touchAction: 'none',
-                background: 'transparent'
+                background: 'rgba(255,0,0,0.1)', // Màu đỏ nhạt để debug
+                pointerEvents: 'auto'
               }}
               onTouchStart={(e) => {
-                // Chỉ xử lý khi có đúng 2 ngón
+                console.log('Touch start:', e.touches.length);
                 if (e.touches.length === 2) {
-                  // Enable pointer events chỉ khi có 2 ngón
-                  e.currentTarget.style.pointerEvents = 'auto';
-                  
-                  const touch1 = e.touches[0];
-                  const touch2 = e.touches[1];
-                  
-                  // Lưu vị trí ban đầu vào DOM element (tránh re-render)
-                  const element = e.currentTarget as HTMLElement & {
-                    startY1?: number;
-                    startY2?: number;
-                    gestureDetected?: boolean;
-                  };
-                  
-                  element.startY1 = touch1.clientY;
-                  element.startY2 = touch2.clientY;
-                  element.gestureDetected = false;
+                  console.log('2 fingers detected!');
+                  // Test: hiện nút ngay khi có 2 ngón
+                  setShowMapButton(true);
                 }
-              }}
-              onTouchMove={(e) => {
-                // Chỉ xử lý khi có đúng 2 ngón
-                if (e.touches.length === 2) {
-                  const touch1 = e.touches[0];
-                  const touch2 = e.touches[1];
-                  const element = e.currentTarget as HTMLElement & {
-                    startY1?: number;
-                    startY2?: number;
-                    gestureDetected?: boolean;
-                  };
-                  
-                  // Kiểm tra có vị trí ban đầu không
-                  if (element.startY1 !== undefined && element.startY2 !== undefined && !element.gestureDetected) {
-                    // Tính khoảng cách di chuyển (kéo xuống = số dương)
-                    const moveY1 = touch1.clientY - element.startY1;
-                    const moveY2 = touch2.clientY - element.startY2;
-                    
-                    // Kiểm tra cả 2 ngón đều kéo xuống ít nhất 50px
-                    if (moveY1 >= 50 && moveY2 >= 50) {
-                      element.gestureDetected = true;
-                      setShowMapButton(true);
-                    }
-                  }
-                }
-              }}
-              onTouchEnd={(e) => {
-                // Disable pointer events khi kết thúc gesture
-                e.currentTarget.style.pointerEvents = 'none';
-                
-                // Reset các giá trị khi kết thúc touch
-                const element = e.currentTarget as HTMLElement & {
-                  startY1?: number;
-                  startY2?: number;
-                  gestureDetected?: boolean;
-                };
-                
-                element.startY1 = undefined;
-                element.startY2 = undefined;
-                element.gestureDetected = undefined;
               }}
             />
           )}
