@@ -570,6 +570,16 @@ const Index = () => {
             )}
             
             
+            {/* Mobile Map Button - simple, always visible when open */}
+            {letterState === 'open' && isMobile && (
+              <div 
+                onClick={handleMapClick}
+                className="text-muted-foreground text-xs px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-red-500 cursor-pointer hover:bg-card/90 transition-colors"
+              >
+                📍 ເບິ່ງແຜນທີ່
+              </div>
+            )}
+            
             {/* Open/Close Button - Same position for both states */}
             {letterState === 'closed' && (
               <Button 
