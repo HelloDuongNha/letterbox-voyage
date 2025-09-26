@@ -266,6 +266,15 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
     
     // Expose function to parent
     (window as any).handleCameraControl = handleCameraControl;
+    
+    // Expose reset to center function for mobile
+    (window as any).resetToCenter = () => {
+      if (controlsRef.current) {
+        controlsRef.current.target.set(0, 0, 0);
+        controlsRef.current.update();
+      }
+      setCardPosition([0, 0, 0]);
+    };
   }, []);
 
   return (
@@ -313,7 +322,7 @@ export const InteractiveLetterBox = React.forwardRef<any, InteractiveLetterBoxPr
           ref={controlsRef}
           enablePan={isOpen}
           enableZoom={true}
-          minDistance={isMobile ? 2 : 5}
+          minDistance={isMobile ? 2 : 3}
           maxDistance={12}
           maxPolarAngle={Math.PI}
           minPolarAngle={0}

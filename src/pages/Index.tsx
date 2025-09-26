@@ -61,6 +61,7 @@ const Index = () => {
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const letterRef = useRef<Group>(null);
   
@@ -81,12 +82,17 @@ const Index = () => {
   const handleCloseLetter = () => {
     console.log("closing...");
     
+    // Mobile: reset to center immediately
+    if (isMobile && (window as any).resetToCenter) {
+      (window as any).resetToCenter();
+    }
+    
+    // Immediate UI feedback - change button state
+    setLetterState('closing');
     if (letterRef.current) {
-      // 1. Close the letter first (change to closed state immediately)
-      setLetterState('closing'); // This will show closed state
-      console.log("Letter closed");
+      console.log("Letter closing...");
       
-      // Small delay to ensure closed state is rendered, then start rotation
+      // Small delay to ensure state is rendered, then start rotation
       setTimeout(() => {
         // 2. Reset rotation and start rotation tween around Y axis
         letterRef.current!.rotation.set(0, 0, 0);
@@ -124,6 +130,20 @@ const Index = () => {
         setLetterState('closed');
       }, 100);
     }
+  };
+
+  const handleInstructionsClick = () => {
+    const instructions = isMobile 
+      ? "Hướng dẫn sử dụng (Mobile):\n\nỞ bên ngoài thư:\n• Dùng 1 ngón để xoay xung quanh thư\n\nKhi mở thư:\n• Dùng 2 ngón để zoom in/out\n• Dùng 2 ngón để cuộn lên/xuống, trái/phải\n• Dùng 1 ngón để xoay xung quanh thư"
+      : "Hướng dẫn sử dụng (PC):\n\nỞ bên ngoài thư:\n• Giữ chuột trái và kéo để xoay xung quanh thư\n\nKhi mở thư:\n• Dùng thanh cuộn để cuộn lên/xuống\n• Giữ chuột trái và kéo để xoay xung quanh thư\n• Zoom: Scroll chuột (nếu có) hoặc 2 ngón trên touchpad";
+    
+    setShowInstructions(true);
+    alert(instructions);
+    
+    // Auto close after 10 seconds
+    setTimeout(() => {
+      setShowInstructions(false);
+    }, 10000);
   };
 
   const handleMapClick = () => {
@@ -443,8 +463,8 @@ const Index = () => {
             ref={letterRef}
           />
           
-          {/* Scroll bar - only when open, responsive for landscape */}
-          {letterState === 'open' && (
+          {/* Scroll bar - only when open and not mobile, responsive for landscape */}
+          {letterState === 'open' && !isMobile && (
             <div className="absolute portrait:right-12 landscape:right-6 
                             portrait:top-1/2 landscape:top-1/2 
                             transform -translate-y-1/2 flex flex-col items-center 
@@ -512,6 +532,17 @@ const Index = () => {
               </div>
             </div>
           )}
+
+          {/* Instructions button - top left corner */}
+          <div className="absolute top-8 left-8">
+            <Button
+              onClick={handleInstructionsClick}
+              className="w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card text-foreground shadow-lg flex items-center justify-center"
+              size="sm"
+            >
+              ?
+            </Button>
+          </div>
 
           {/* Fullscreen button - bottom left corner */}
           <div className="absolute bottom-8 left-8">
