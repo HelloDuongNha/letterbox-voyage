@@ -62,6 +62,7 @@ const Index = () => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showMapButton, setShowMapButton] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const letterRef = useRef<Group>(null);
   
@@ -462,6 +463,78 @@ const Index = () => {
             onLoadComplete={handleLoadComplete}
             ref={letterRef}
           />
+
+          {/* Mobile Touch Overlay - detect 2-finger swipe down gesture */}
+          {letterState === 'open' && isMobile && (
+            <div 
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{ 
+                touchAction: 'none',
+                background: 'transparent'
+              }}
+              onTouchStart={(e) => {
+                // Chỉ xử lý khi có đúng 2 ngón
+                if (e.touches.length === 2) {
+                  // Enable pointer events chỉ khi có 2 ngón
+                  e.currentTarget.style.pointerEvents = 'auto';
+                  
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  
+                  // Lưu vị trí ban đầu vào DOM element (tránh re-render)
+                  const element = e.currentTarget as HTMLElement & {
+                    startY1?: number;
+                    startY2?: number;
+                    gestureDetected?: boolean;
+                  };
+                  
+                  element.startY1 = touch1.clientY;
+                  element.startY2 = touch2.clientY;
+                  element.gestureDetected = false;
+                }
+              }}
+              onTouchMove={(e) => {
+                // Chỉ xử lý khi có đúng 2 ngón
+                if (e.touches.length === 2) {
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  const element = e.currentTarget as HTMLElement & {
+                    startY1?: number;
+                    startY2?: number;
+                    gestureDetected?: boolean;
+                  };
+                  
+                  // Kiểm tra có vị trí ban đầu không
+                  if (element.startY1 !== undefined && element.startY2 !== undefined && !element.gestureDetected) {
+                    // Tính khoảng cách di chuyển (kéo xuống = số dương)
+                    const moveY1 = touch1.clientY - element.startY1;
+                    const moveY2 = touch2.clientY - element.startY2;
+                    
+                    // Kiểm tra cả 2 ngón đều kéo xuống ít nhất 50px
+                    if (moveY1 >= 50 && moveY2 >= 50) {
+                      element.gestureDetected = true;
+                      setShowMapButton(true);
+                    }
+                  }
+                }
+              }}
+              onTouchEnd={(e) => {
+                // Disable pointer events khi kết thúc gesture
+                e.currentTarget.style.pointerEvents = 'none';
+                
+                // Reset các giá trị khi kết thúc touch
+                const element = e.currentTarget as HTMLElement & {
+                  startY1?: number;
+                  startY2?: number;
+                  gestureDetected?: boolean;
+                };
+                
+                element.startY1 = undefined;
+                element.startY2 = undefined;
+                element.gestureDetected = undefined;
+              }}
+            />
+          )}
           
           {/* Scroll bar - only when open and not mobile, responsive for landscape */}
           {letterState === 'open' && !isMobile && (
@@ -568,15 +641,6 @@ const Index = () => {
               </div>
             )}
             
-            {/* Mobile Map Button - simple, always visible when open */}
-            {letterState === 'open' && isMobile && (
-              <div 
-                onClick={handleMapClick}
-                className="text-muted-foreground text-xs px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-red-500 cursor-pointer hover:bg-card/90 transition-colors"
-              >
-                📍 ເບິ່ງແຜນທີ່
-              </div>
-            )}
             
             {/* Open/Close Button - Same position for both states */}
             {letterState === 'closed' && (
@@ -598,6 +662,18 @@ const Index = () => {
             )}
           </div>
         </div>
+
+        {/* Mobile Map Button - Bottom Right Corner (từ gesture) */}
+        {showMapButton && letterState === 'open' && isMobile && (
+          <div className="absolute bottom-8 right-8 z-20">
+            <div 
+              onClick={handleMapClick}
+              className="w-16 h-16 rounded-full bg-red-500/90 backdrop-blur-sm border-2 border-white cursor-pointer hover:bg-red-600/90 transition-all duration-300 flex items-center justify-center shadow-lg animate-pulse"
+            >
+              <span className="text-white text-2xl">📍</span>
+            </div>
+          </div>
+        )}
 
         {/* Corner decorations */}
         <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-accent/30 rounded-tl-lg" />
