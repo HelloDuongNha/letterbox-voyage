@@ -464,21 +464,70 @@ const Index = () => {
             ref={letterRef}
           />
 
-          {/* Mobile Touch Overlay - simple test */}
+          {/* Mobile Touch Overlay - detect 2-finger swipe down */}
           {letterState === 'open' && isMobile && (
             <div 
               className="absolute inset-0 z-10"
               style={{ 
-                background: 'rgba(255,0,0,0.1)', // Màu đỏ nhạt để debug
-                pointerEvents: 'auto'
+                background: 'transparent',
+                pointerEvents: 'auto',
+                touchAction: 'none'
               }}
               onTouchStart={(e) => {
-                console.log('Touch start:', e.touches.length);
                 if (e.touches.length === 2) {
-                  console.log('2 fingers detected!');
-                  // Test: hiện nút ngay khi có 2 ngón
-                  setShowMapButton(true);
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  
+                  // Lưu vị trí ban đầu
+                  const element = e.currentTarget as HTMLElement & {
+                    startY1?: number;
+                    startY2?: number;
+                    gestureDetected?: boolean;
+                  };
+                  
+                  element.startY1 = touch1.clientY;
+                  element.startY2 = touch2.clientY;
+                  element.gestureDetected = false;
+                  
+                  console.log('2 fingers start at:', element.startY1, element.startY2);
                 }
+              }}
+              onTouchMove={(e) => {
+                if (e.touches.length === 2) {
+                  const touch1 = e.touches[0];
+                  const touch2 = e.touches[1];
+                  const element = e.currentTarget as HTMLElement & {
+                    startY1?: number;
+                    startY2?: number;
+                    gestureDetected?: boolean;
+                  };
+                  
+                  if (element.startY1 !== undefined && element.startY2 !== undefined && !element.gestureDetected) {
+                    const moveY1 = touch1.clientY - element.startY1;
+                    const moveY2 = touch2.clientY - element.startY2;
+                    
+                    console.log('Move distances:', moveY1, moveY2);
+                    
+                    // Cả 2 ngón kéo xuống ≥50px
+                    if (moveY1 >= 50 && moveY2 >= 50) {
+                      console.log('Gesture detected! Showing map button');
+                      element.gestureDetected = true;
+                      setShowMapButton(true);
+                    }
+                  }
+                }
+              }}
+              onTouchEnd={(e) => {
+                const element = e.currentTarget as HTMLElement & {
+                  startY1?: number;
+                  startY2?: number;
+                  gestureDetected?: boolean;
+                };
+                
+                console.log('Touch end');
+                element.startY1 = undefined;
+                element.startY2 = undefined;
+                element.gestureDetected = undefined;
               }}
             />
           )}
