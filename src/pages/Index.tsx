@@ -557,22 +557,22 @@ const Index = () => {
 
           {/* Controls - Positioned lower to avoid being cut off */}
           <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 text-center flex flex-col items-center gap-2 sm:gap-3 pb-safe">
-            {/* PC Map Button - only shows on PC with scroll condition */}
+            {/* PC Map Button - with scroll condition */}
             {letterState === 'open' && !isMobile && scrollValue <= mapThreshold && (
               <div 
                 key={`map-button-${scrollValue}`}
                 onClick={handleMapClick}
-                className="text-muted-foreground text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
+                className="text-muted-foreground text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-card/80 backdrop-blur-sm rounded-full border border-red-500 cursor-pointer hover:bg-card/90 transition-colors"
               >
                 📍 ເບິ່ງແຜນທີ່
               </div>
             )}
             
-            {/* Mobile Map Button - simple, always shows when open on mobile */}
+            {/* Mobile Map Button - simple, always visible when open */}
             {letterState === 'open' && isMobile && (
               <div 
                 onClick={handleMapClick}
-                className="text-muted-foreground text-xs px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-border/50 cursor-pointer hover:bg-card/90 transition-colors"
+                className="text-muted-foreground text-xs px-3 py-1.5 bg-card/80 backdrop-blur-sm rounded-full border border-red-500 cursor-pointer hover:bg-card/90 transition-colors"
               >
                 📍 ເບິ່ງແຜນທີ່
               </div>
